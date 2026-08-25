@@ -76,8 +76,6 @@ function DrawContent() {
     const allRevealed = updated.every((c) => c.isRevealed);
     if (allRevealed) {
       const cardsOnly = updated.map((c) => c.card);
-      const history = Storage.getHistory();
-      const birthProfile = Storage.getBirthProfile();
       const analysis = analyzeCards(cardsOnly, question, category, spreadType, isClarifier, parentReadingId);
       setReadingResult(analysis);
       Storage.saveReading(analysis);
@@ -128,14 +126,14 @@ function DrawContent() {
     setSpreadType(cardCount === 1 ? 'three' : 'three');
     setDrawnCards([]);
     setReadingResult(null);
-    setPhase('deck'); // Jump directly to intuitive deck draw for quick clarifier
+    setPhase('deck');
   };
 
   const isAllRevealed = drawnCards.length > 0 && drawnCards.every((c) => c.isRevealed);
   const cardCountToDraw = isClarifier ? (spreadType === 'three' ? 3 : 1) : spreadConfig.cardCount;
 
   return (
-    <div className="flex-1 flex flex-col px-4 pt-1 pb-8 space-y-4">
+    <div className="flex-1 flex flex-col px-4 pt-1 pb-8 space-y-4 select-none">
       <TopHeader
         title={isClarifier ? '追问澄清神谕' : spreadConfig.title}
         showBack
@@ -149,11 +147,11 @@ function DrawContent() {
       />
 
       {/* Progress & Step Indicator */}
-      <div className="w-full flex items-center justify-between px-2 pt-1 text-xs font-serif border-b border-neutral-800/80 pb-2">
-        <span className="text-amber-400 font-bold truncate max-w-[200px]">
+      <div className="w-full flex items-center justify-between px-2 pt-1 text-xs font-serif border-b border-stone-200 pb-2">
+        <span className="text-amber-900 font-bold truncate max-w-[200px]">
           {isClarifier ? '追问：' : '问：'}{question}
         </span>
-        <span className="text-neutral-400 text-[11px]">
+        <span className="text-stone-500 text-[11px] font-medium">
           {phase === 'shuffle' && '第一阶段 · 洗牌聚气'}
           {phase === 'cut' && '第二阶段 · 切牌定序'}
           {phase === 'deck' && '第三阶段 · 直觉抽牌'}
@@ -166,10 +164,10 @@ function DrawContent() {
       {phase === 'shuffle' && (
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="text-center mb-2">
-            <h2 className="text-xl font-serif font-bold text-gold-gradient">
+            <h2 className="text-xl font-serif font-black text-gold-gradient">
               52张东方神明扑克
             </h2>
-            <p className="text-xs text-neutral-400 font-serif mt-1">
+            <p className="text-xs text-stone-500 font-serif mt-1">
               静心默念你的问题，点击下方按钮开始洗牌
             </p>
           </div>
@@ -200,13 +198,13 @@ function DrawContent() {
         <div className="flex-1 flex flex-col items-center space-y-4 animate-fade-in">
           {/* Action Bar for Quick Reveal */}
           {!isAllRevealed && (
-            <div className="w-full flex items-center justify-between bg-neutral-900/60 p-2.5 rounded-xl border border-amber-500/20">
-              <span className="text-xs font-serif text-amber-300">
+            <div className="w-full flex items-center justify-between bg-amber-50/80 p-3 rounded-2xl border border-amber-300 shadow-xs">
+              <span className="text-xs font-serif font-bold text-amber-900">
                 请逐一点击卡牌翻开显圣
               </span>
               <button
                 onClick={handleRevealAll}
-                className="px-3 py-1 rounded-lg bg-amber-950/80 border border-amber-500/40 text-amber-300 text-xs font-serif hover:border-amber-300 flex items-center gap-1 active:scale-95 transition-all"
+                className="px-3.5 py-1.5 rounded-xl bg-amber-500 text-stone-950 text-xs font-serif font-black hover:bg-amber-400 flex items-center gap-1 active:scale-95 transition-all shadow-xs"
               >
                 <Eye className="w-3.5 h-3.5" />
                 <span>一键翻牌</span>
@@ -250,7 +248,7 @@ function DrawContent() {
 
           {/* If all cards are revealed, show Intelligence Reading Summary */}
           {isAllRevealed && readingResult && (
-            <div className="w-full space-y-4 pt-3 border-t border-neutral-800 animate-fade-in">
+            <div className="w-full space-y-4 pt-3 border-t border-stone-200 animate-fade-in">
               <ReadingSummary
                 reading={readingResult}
                 onSelectFollowUp={handleFollowUpSelect}
@@ -263,9 +261,9 @@ function DrawContent() {
                     sound.playCardSelect();
                     router.push('/journey');
                   }}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-serif font-bold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-stone-950 font-serif font-black text-sm shadow-[0_4px_20px_rgba(212,175,55,0.4)] flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
                 >
-                  <Sparkles className="w-4 h-4 fill-black" />
+                  <Sparkles className="w-4 h-4 fill-stone-950" />
                   <span>天机已载入生命轨迹 · 查看我的轨迹</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
@@ -275,7 +273,7 @@ function DrawContent() {
                     sound.playCardSelect();
                     router.push('/question');
                   }}
-                  className="w-full py-3 rounded-2xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 font-serif text-xs flex items-center justify-center gap-2 transition-colors"
+                  className="w-full py-3 rounded-2xl bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 font-serif font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>问另一事 · 重新起卦</span>
@@ -297,7 +295,7 @@ function DrawContent() {
 
 export default function DrawPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-amber-300">正在进入神谕空间...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-amber-800 font-serif text-xs">正在进入神谕空间...</div>}>
       <DrawContent />
     </Suspense>
   );

@@ -18,14 +18,12 @@ export const CardDeck: React.FC<CardDeckProps> = ({
   requiredCount,
   onCardsSelected,
 }) => {
-  // Shuffle cards internally for honest randomness on each session
   const [deck, setDeck] = useState<OracleCardData[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState<number>(25); // Center around middle card
+  const [selectedIndex, setSelectedIndex] = useState<number>(25);
   const [selectedCards, setSelectedCards] = useState<OracleCardData[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Deterministic or pseudo-random shuffle of the 52 cards
     const shuffled = [...ORACLE_CARDS].sort(() => Math.random() - 0.5);
     setDeck(shuffled);
   }, []);
@@ -36,7 +34,6 @@ export const CardDeck: React.FC<CardDeckProps> = ({
 
     const isAlreadySelected = selectedCards.some((c) => c.id === card.id);
     if (isAlreadySelected) {
-      // Unselect
       setSelectedCards(selectedCards.filter((c) => c.id !== card.id));
     } else {
       if (selectedCards.length < requiredCount) {
@@ -53,7 +50,6 @@ export const CardDeck: React.FC<CardDeckProps> = ({
   };
 
   const handleAutoSelect = () => {
-    // Help user auto-draw remaining cards randomly by intuition
     sound.playShuffleSound();
     const remainingCount = requiredCount - selectedCards.length;
     const available = deck.filter((c) => !selectedCards.some((s) => s.id === c.id));
@@ -67,20 +63,20 @@ export const CardDeck: React.FC<CardDeckProps> = ({
       {/* Top Status & Instructions */}
       <div className="w-full px-4 flex items-center justify-between mb-2">
         <div className="flex flex-col">
-          <span className="text-xs text-neutral-400 font-serif">
+          <span className="text-xs text-stone-500 font-serif font-medium">
             请凭直觉触摸牌组抽取
           </span>
-          <span className="text-sm font-serif font-bold text-amber-200">
-            已抽取 <span className="text-amber-400 font-mono text-base">{selectedCards.length}</span> / {requiredCount} 张
+          <span className="text-sm font-serif font-black text-amber-900">
+            已抽取 <span className="text-amber-700 font-mono text-base font-black">{selectedCards.length}</span> / {requiredCount} 张
           </span>
         </div>
 
         {selectedCards.length < requiredCount && (
           <button
             onClick={handleAutoSelect}
-            className="px-3 py-1 rounded-full bg-neutral-900 border border-amber-500/30 text-amber-300 text-xs font-serif hover:border-amber-400 flex items-center gap-1 active:scale-95 transition-all"
+            className="px-3 py-1 rounded-full bg-amber-50 border border-amber-300 text-amber-900 text-xs font-serif font-bold hover:bg-amber-100 flex items-center gap-1 shadow-xs active:scale-95 transition-all"
           >
-            <Sparkles className="w-3 h-3 text-amber-400" />
+            <Sparkles className="w-3 h-3 text-amber-700" />
             <span>灵感随选</span>
           </button>
         )}
@@ -100,7 +96,6 @@ export const CardDeck: React.FC<CardDeckProps> = ({
           {deck.map((card, index) => {
             const isSelected = selectedCards.some((c) => c.id === card.id);
             const selectionOrder = selectedCards.findIndex((c) => c.id === card.id) + 1;
-            const isCurrentFocus = selectedIndex === index;
 
             return (
               <motion.div
@@ -113,8 +108,8 @@ export const CardDeck: React.FC<CardDeckProps> = ({
                 }}
                 transition={{ duration: 0.25 }}
                 className={cn(
-                  'relative w-24 h-36 cursor-pointer flex-shrink-0 transition-all duration-300 rounded-lg group',
-                  isSelected && 'z-30 shadow-[0_0_25px_rgba(212,175,55,0.7)]'
+                  'relative w-24 h-36 cursor-pointer flex-shrink-0 transition-all duration-300 rounded-2xl group',
+                  isSelected && 'z-30 shadow-[0_10px_25px_rgba(212,175,55,0.45)]'
                 )}
                 style={{
                   marginRight: '-12px',
@@ -122,17 +117,17 @@ export const CardDeck: React.FC<CardDeckProps> = ({
               >
                 <CardBack
                   className={cn(
-                    'w-full h-full shadow-lg transition-all',
+                    'w-full h-full shadow-md transition-all',
                     isSelected
-                      ? 'border-2 border-amber-300 ring-2 ring-amber-400/50'
-                      : 'hover:border-amber-400/60'
+                      ? 'border-2 border-amber-500 ring-2 ring-amber-400/60'
+                      : 'hover:border-amber-400'
                   )}
                   isGlowing={isSelected}
                 />
 
                 {/* Selected Order Badge */}
                 {isSelected && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-black font-bold font-mono text-xs flex items-center justify-center shadow-lg border border-white">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 font-black font-mono text-xs flex items-center justify-center shadow-md border-2 border-white">
                     {selectionOrder}
                   </div>
                 )}
@@ -151,10 +146,10 @@ export const CardDeck: React.FC<CardDeckProps> = ({
               <div
                 key={idx}
                 className={cn(
-                  'w-8 h-12 rounded border flex items-center justify-center transition-all duration-300',
+                  'w-8 h-12 rounded-lg border flex items-center justify-center transition-all duration-300',
                   card
-                    ? 'border-amber-400 bg-amber-950/60 text-amber-300 text-xs font-mono font-bold shadow-[0_0_8px_rgba(212,175,55,0.4)]'
-                    : 'border-neutral-800 bg-neutral-900/40 text-neutral-600 text-[10px]'
+                    ? 'border-amber-500 bg-amber-100/90 text-amber-900 text-xs font-mono font-black shadow-xs'
+                    : 'border-stone-200 bg-stone-100/60 text-stone-400 text-[10px]'
                 )}
               >
                 {card ? idx + 1 : '☯'}
@@ -170,10 +165,10 @@ export const CardDeck: React.FC<CardDeckProps> = ({
           onClick={handleConfirm}
           disabled={selectedCards.length !== requiredCount}
           className={cn(
-            'w-full py-3.5 rounded-2xl font-serif font-bold text-base flex items-center justify-center gap-2 tracking-widest transition-all duration-300',
+            'w-full py-4 rounded-2xl font-serif font-black text-sm flex items-center justify-center gap-2 tracking-widest transition-all duration-300',
             selectedCards.length === requiredCount
-              ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-black shadow-[0_0_25px_rgba(212,175,55,0.6)] active:scale-[0.98]'
-              : 'bg-neutral-900 border border-neutral-800 text-neutral-500 cursor-not-allowed'
+              ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-stone-950 shadow-[0_4px_20px_rgba(212,175,55,0.4)] active:scale-[0.98]'
+              : 'bg-stone-200/80 border border-stone-300 text-stone-400 cursor-not-allowed'
           )}
         >
           <Sparkles className={cn('w-4 h-4', selectedCards.length === requiredCount && 'animate-spin-slow')} />

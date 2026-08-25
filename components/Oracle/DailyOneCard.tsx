@@ -23,7 +23,6 @@ export const DailyOneCard: React.FC = () => {
         setIsRevealed(true);
       }
     } else {
-      // Pick a random card based on day
       const dayNum = new Date().getDate();
       const card = ORACLE_CARDS[dayNum % ORACLE_CARDS.length];
       setDailyCard(card);
@@ -44,19 +43,19 @@ export const DailyOneCard: React.FC = () => {
   };
 
   return (
-    <div className="w-full glass-panel rounded-2xl p-4 border border-amber-500/20 shadow-xl flex flex-col items-center relative overflow-hidden">
+    <div className="w-full glass-panel rounded-3xl p-4 border border-amber-400/40 shadow-sm flex flex-col items-center relative overflow-hidden">
       {/* Top Header */}
       <div className="w-full flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-          <h3 className="text-sm font-serif font-bold text-amber-200 tracking-wider">
+          <span className="w-2 h-2 rounded-full bg-amber-600 animate-ping" />
+          <h3 className="text-sm font-serif font-bold text-stone-900 tracking-wider">
             今日一牌 · 灵犀感应
           </h3>
         </div>
         {isRevealed && (
           <button
             onClick={handleRedraw}
-            className="text-[11px] text-neutral-400 hover:text-amber-300 flex items-center gap-1 transition-colors"
+            className="text-[11px] text-stone-500 hover:text-amber-800 flex items-center gap-1 transition-colors font-serif font-medium"
           >
             <RefreshCw className="w-3 h-3" />
             <span>重新感应</span>
@@ -76,18 +75,18 @@ export const DailyOneCard: React.FC = () => {
 
       {/* Revealed Message */}
       {isRevealed && (
-        <div className="w-full mt-3 pt-3 border-t border-neutral-800/80 flex flex-col items-center text-center animate-fade-in">
-          <div className="flex items-center gap-1.5 text-xs text-amber-300 font-serif font-semibold mb-1">
-            <Sparkles className="w-3.5 h-3.5" />
+        <div className="w-full mt-3 pt-3 border-t border-amber-900/10 flex flex-col items-center text-center animate-fade-in">
+          <div className="flex items-center gap-1.5 text-xs text-amber-900 font-serif font-bold mb-1">
+            <Sparkles className="w-3.5 h-3.5 text-amber-700 fill-amber-700" />
             <span>【{dailyCard.cardName || dailyCard.name} · {dailyCard.archetype}】{dailyCard.keywords.join(' · ')}</span>
           </div>
-          <p className="text-xs text-neutral-300 font-serif italic max-w-xs leading-relaxed px-2">
+          <p className="text-xs text-stone-700 font-serif italic max-w-xs leading-relaxed px-2">
             “{dailyCard.oracle || dailyCard.oracleMessage}”
           </p>
 
           <Link
             href={`/cards/${dailyCard.id}`}
-            className="mt-2 text-[11px] text-amber-400/80 hover:text-amber-300 flex items-center gap-1 transition-colors font-serif underline decoration-amber-500/30 underline-offset-2"
+            className="mt-2 text-[11px] text-amber-800 hover:text-amber-950 font-bold flex items-center gap-1 transition-colors font-serif underline decoration-amber-500/40 underline-offset-2"
           >
             <BookOpen className="w-3 h-3" />
             <span>查看完整神谕密语与五行解说</span>

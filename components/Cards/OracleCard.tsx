@@ -38,31 +38,31 @@ export const OracleCard: React.FC<OracleCardProps> = ({
     <div
       onClick={onClick}
       className={cn(
-        'relative rounded-xl overflow-hidden bg-gradient-to-b from-[#161a24] via-[#0d1017] to-[#06070a] border flex flex-col justify-between p-3 select-none transition-all duration-300',
-        suitInfo.border,
-        'hover:shadow-[0_0_20px_rgba(212,175,55,0.25)]',
+        'relative rounded-2xl overflow-hidden bg-gradient-to-b from-[#FFFFFF] via-[#FAF7F0] to-[#F3EDE0] border border-amber-500/30 flex flex-col justify-between p-3 select-none transition-all duration-300 shadow-[0_4px_16px_rgba(180,140,50,0.12)]',
+        'hover:shadow-[0_8px_25px_rgba(212,175,55,0.35)] hover:-translate-y-0.5',
         className
       )}
       style={{
         aspectRatio: '2/3',
       }}
     >
-      {/* Background Realm Radial Tint */}
+      {/* Background Realm Subtle Radial Tint */}
       <div
         className={cn(
-          'absolute inset-0 bg-gradient-to-b opacity-40 pointer-events-none',
+          'absolute inset-0 bg-gradient-to-b opacity-15 pointer-events-none',
           card.gradient
         )}
       />
 
-      {/* Decorative Golden Inset Border */}
-      <div className="absolute inset-1.5 rounded-lg border border-amber-500/20 pointer-events-none" />
+      {/* Decorative Golden Inset Filigree Border */}
+      <div className="absolute inset-1.5 rounded-xl border border-amber-600/25 pointer-events-none" />
+      <div className="absolute inset-2 rounded-lg border border-amber-500/10 pointer-events-none" />
 
       {/* Top Header: Rank, Suit, Realm & YinYang */}
       <div className="relative z-10 flex items-start justify-between">
         {/* Top-Left Rank & Suit */}
         <div className="flex flex-col items-center">
-          <span className={cn('text-lg font-serif font-bold leading-none', suitInfo.color)}>
+          <span className={cn('text-lg font-serif font-black leading-none', suitInfo.color)}>
             {card.rank}
           </span>
           <span className={cn('text-xs leading-none mt-0.5', suitInfo.color)}>
@@ -75,7 +75,7 @@ export const OracleCard: React.FC<OracleCardProps> = ({
           {/* YinYang & Element Tag */}
           <div
             className={cn(
-              'px-2 py-0.5 rounded-full text-[10px] font-medium border flex items-center gap-1 backdrop-blur-md',
+              'px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 backdrop-blur-md shadow-xs',
               elementStyle.bg,
               elementStyle.border,
               elementStyle.text
@@ -88,7 +88,7 @@ export const OracleCard: React.FC<OracleCardProps> = ({
           </div>
 
           {/* Realm Name */}
-          <span className="text-[9px] text-neutral-400 font-serif tracking-widest">
+          <span className="text-[9px] text-stone-500 font-serif font-bold tracking-widest">
             {card.realm || suitInfo.name}
           </span>
         </div>
@@ -97,35 +97,35 @@ export const OracleCard: React.FC<OracleCardProps> = ({
       {/* Center Figure & Title */}
       <div className="relative z-10 flex flex-col items-center justify-center my-auto text-center px-1">
         {/* Subtle Archetype Seal Circle */}
-        <div className="relative w-14 h-14 rounded-full border border-amber-400/30 flex items-center justify-center bg-black/40 mb-1.5 shadow-[0_0_15px_rgba(0,0,0,0.8)]">
-          <div className="absolute inset-0 rounded-full bg-gradient-to-b from-amber-500/10 to-transparent blur-sm" />
-          <span className="text-xl font-serif text-amber-200 drop-shadow-[0_0_10px_rgba(212,175,55,0.6)]">
+        <div className="relative w-14 h-14 rounded-full border border-amber-600/40 flex items-center justify-center bg-gradient-to-br from-amber-50 to-amber-100 mb-1.5 shadow-[0_2px_10px_rgba(212,175,55,0.25)]">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-b from-amber-400/10 to-transparent blur-xs" />
+          <span className="text-xl font-serif font-extrabold text-amber-900 drop-shadow-xs">
             {card.archetype ? card.archetype.charAt(0) : card.cardName.charAt(0)}
           </span>
         </div>
 
         {/* Card Name */}
-        <h3 className="text-base font-serif font-bold tracking-wider text-amber-100 drop-shadow-sm leading-tight">
+        <h3 className="text-base font-serif font-extrabold tracking-wider text-stone-900 leading-tight">
           {card.cardName}
         </h3>
 
         {/* Archetype Name */}
-        <p className="text-[10px] text-amber-300/90 font-serif tracking-wider truncate max-w-full px-2 mt-0.5">
+        <p className="text-[10px] text-amber-800 font-serif font-bold tracking-wider truncate max-w-full px-2 mt-0.5">
           【{card.archetype}】
         </p>
 
         {/* Archetype Label / Type */}
-        <span className="mt-1 px-1.5 py-0.2 rounded bg-neutral-900/80 border border-neutral-700/50 text-[8px] text-neutral-400 font-serif">
+        <span className="mt-1 px-1.5 py-0.2 rounded-full bg-amber-50 border border-amber-300/60 text-[8px] text-stone-600 font-serif font-medium">
           {TYPE_NAME_MAP[card.type] || card.type}
         </span>
       </div>
 
       {/* Bottom Section: Energy Stars & Keywords */}
-      <div className="relative z-10 flex flex-col gap-1 pt-1 border-t border-neutral-800/80">
+      <div className="relative z-10 flex flex-col gap-1 pt-1 border-t border-amber-900/10">
         {/* Energy Rating & Title */}
         <div className="flex items-center justify-between text-[9.5px]">
-          <span className="text-amber-400 font-serif font-medium flex items-center gap-0.5">
-            <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+          <span className="text-amber-800 font-serif font-bold flex items-center gap-0.5">
+            <Sparkles className="w-2.5 h-2.5 text-amber-600 fill-amber-600" />
             {card.energyTitle}
           </span>
 
@@ -136,7 +136,7 @@ export const OracleCard: React.FC<OracleCardProps> = ({
                 key={star}
                 className={cn(
                   'text-[9px] leading-none',
-                  star <= card.energyLevel ? 'text-amber-400 drop-shadow-[0_0_3px_#D4AF37]' : 'text-neutral-700'
+                  star <= card.energyLevel ? 'text-amber-600 drop-shadow-xs' : 'text-stone-300'
                 )}
               >
                 ★
@@ -148,16 +148,21 @@ export const OracleCard: React.FC<OracleCardProps> = ({
         {/* Keywords */}
         {!isCompact && (
           <div className="flex items-center justify-center gap-1 flex-wrap">
-            {card.keywords.slice(0, 3).map((kw, idx) => (
+            {card.keywords.slice(0, 3).map((kw, i) => (
               <span
-                key={idx}
-                className="text-[8.5px] px-1.5 py-0.2 rounded bg-neutral-900/60 text-neutral-300 font-serif border border-neutral-800/80"
+                key={i}
+                className="text-[8.5px] px-1.5 py-0.2 rounded-md bg-stone-100/90 text-stone-700 font-serif border border-stone-200/80"
               >
                 {kw}
               </span>
             ))}
           </div>
         )}
+      </div>
+
+      {/* Bottom Logo Footnote */}
+      <div className="text-[7.5px] tracking-[0.25em] text-amber-800/40 text-center font-serif uppercase pt-0.5">
+        TIANJI 52
       </div>
     </div>
   );

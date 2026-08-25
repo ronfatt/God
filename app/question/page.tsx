@@ -23,9 +23,9 @@ export default function QuestionPage() {
       symbol: '❤️',
       desc: '正缘桃花 · 情感走向 · 修复与和合',
       icon: Heart,
-      color: 'from-rose-950/60 to-neutral-950',
-      border: 'border-rose-500/30 hover:border-rose-400',
-      iconColor: 'text-rose-400',
+      color: 'from-rose-50 to-white',
+      border: 'border-rose-300 hover:border-rose-500',
+      iconColor: 'text-rose-600',
       defaultQuestion: '我近期的感情走向与桃花正缘如何？',
     },
     {
@@ -35,9 +35,9 @@ export default function QuestionPage() {
       symbol: '💰',
       desc: '正偏财运 · 投资机遇 · 财库丰盈',
       icon: Coins,
-      color: 'from-amber-950/60 to-neutral-950',
-      border: 'border-amber-500/30 hover:border-amber-400',
-      iconColor: 'text-amber-400',
+      color: 'from-amber-50 to-white',
+      border: 'border-amber-300 hover:border-amber-500',
+      iconColor: 'text-amber-600',
       defaultQuestion: '我接下来的财运与投资机运如何？',
     },
     {
@@ -47,9 +47,9 @@ export default function QuestionPage() {
       symbol: '💼',
       desc: '晋升突破 · 跳槽创业 · 项目落地',
       icon: Briefcase,
-      color: 'from-emerald-950/60 to-neutral-950',
-      border: 'border-emerald-500/30 hover:border-emerald-400',
-      iconColor: 'text-emerald-400',
+      color: 'from-emerald-50 to-white',
+      border: 'border-emerald-300 hover:border-emerald-500',
+      iconColor: 'text-emerald-700',
       defaultQuestion: '我未来3个月事业发展与晋升机缘如何？',
     },
     {
@@ -59,9 +59,9 @@ export default function QuestionPage() {
       symbol: '👥',
       desc: '良师提携 · 合作契合 · 远离小人',
       icon: Users,
-      color: 'from-purple-950/60 to-neutral-950',
-      border: 'border-purple-500/30 hover:border-purple-400',
-      iconColor: 'text-purple-400',
+      color: 'from-purple-50 to-white',
+      border: 'border-purple-300 hover:border-purple-500',
+      iconColor: 'text-purple-700',
       defaultQuestion: '我近期是否会遇到关键贵人与得力助手？',
     },
     {
@@ -71,9 +71,9 @@ export default function QuestionPage() {
       symbol: '🌙',
       desc: '乾坤大势 · 身心安泰 · 阶段推演',
       icon: Moon,
-      color: 'from-blue-950/60 to-neutral-950',
-      border: 'border-blue-500/30 hover:border-blue-400',
-      iconColor: 'text-cyan-400',
+      color: 'from-cyan-50 to-white',
+      border: 'border-cyan-300 hover:border-cyan-500',
+      iconColor: 'text-cyan-700',
       defaultQuestion: '我当下的整体运势走向与破局指引是什么？',
     },
     {
@@ -83,9 +83,9 @@ export default function QuestionPage() {
       symbol: '🔮',
       desc: '亲笔写下最关切的问题 · 专属推演',
       icon: Sparkles,
-      color: 'from-yellow-950/60 via-amber-950/40 to-neutral-950',
-      border: 'border-amber-400/50 hover:border-amber-300',
-      iconColor: 'text-yellow-300',
+      color: 'from-amber-100/60 via-white to-amber-50',
+      border: 'border-amber-400 hover:border-amber-600',
+      iconColor: 'text-amber-700',
       defaultQuestion: '',
     },
   ];
@@ -97,78 +97,73 @@ export default function QuestionPage() {
     if (cat.id === 'custom') {
       setIsModalOpen(true);
     } else {
-      // Direct advance with default question
       router.push(`/spread?category=${cat.id}&q=${encodeURIComponent(cat.defaultQuestion)}`);
     }
   };
 
-  const handleConfirmCustom = (e: React.FormEvent) => {
+  const handleCustomSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customQuestion.trim()) return;
+
     sound.playBassHit();
     setIsModalOpen(false);
-    router.push(`/spread?category=custom&q=${encodeURIComponent(customQuestion)}`);
+    router.push(`/spread?category=custom&q=${encodeURIComponent(customQuestion.trim())}`);
   };
 
   return (
-    <div className="flex-1 flex flex-col px-4 pt-1 pb-6 space-y-4">
-      <TopHeader showBack onBack={() => router.push('/')} />
+    <div className="flex-1 flex flex-col px-4 pt-1 pb-8 space-y-4 select-none">
+      <TopHeader title="请问天机" showBack onBack={() => router.push('/')} />
 
-      {/* Title */}
-      <div className="pt-2 text-center">
-        <div className="inline-flex items-center gap-1 text-[11px] text-amber-400 font-serif mb-1">
-          <span>01 · 诚意正心</span>
-        </div>
-        <h1 className="text-2xl font-serif font-bold text-gold-gradient tracking-wide">
-          你今天想问什么？
-        </h1>
-        <p className="text-xs text-neutral-400 font-serif mt-1">
-          心诚则灵 · 选定你想洞察的命理领域
+      {/* Hero Title */}
+      <div className="text-center space-y-1 py-1">
+        <h2 className="text-2xl font-serif font-extrabold text-gold-gradient tracking-wide">
+          选择你的求问领域
+        </h2>
+        <p className="text-xs text-stone-500 font-serif">
+          心诚则灵 · 意念专一 · 契合当下因缘
         </p>
       </div>
 
-      {/* 6 Large Category Selection Cards */}
-      <div className="grid grid-cols-1 gap-3 pt-2">
-        {categories.map((cat) => {
+      {/* 6 Category Tiles */}
+      <div className="grid grid-cols-1 gap-2.5">
+        {categories.map((cat, idx) => {
           const Icon = cat.icon;
           return (
-            <button
+            <motion.div
               key={cat.id}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.06 }}
               onClick={() => handleSelectCategory(cat)}
               className={cn(
-                'w-full p-4 rounded-2xl bg-gradient-to-r border text-left flex items-center justify-between transition-all duration-300 active:scale-[0.98] group relative overflow-hidden',
-                cat.color,
-                cat.border,
-                cat.id === 'custom' && 'shadow-[0_0_20px_rgba(212,175,55,0.2)]'
+                'group relative p-4 rounded-2xl glass-panel border cursor-pointer transition-all duration-300 shadow-sm flex items-center justify-between',
+                'hover:shadow-[0_8px_25px_rgba(212,175,55,0.2)] hover:-translate-y-0.5',
+                cat.border
               )}
             >
-              <div className="flex items-center gap-3.5 relative z-10">
-                {/* Symbol Box */}
-                <div className="w-12 h-12 rounded-xl bg-black/50 border border-neutral-700/60 flex items-center justify-center text-xl group-hover:scale-105 transition-transform shadow-inner">
-                  {cat.symbol}
+              <div className="flex items-center gap-3.5">
+                <div className={cn('p-2.5 rounded-xl bg-amber-50/80 border border-amber-300/60 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform')}>
+                  <Icon className={cn('w-5 h-5', cat.iconColor)} />
                 </div>
-
-                {/* Text Content */}
-                <div>
+                <div className="flex flex-col">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-serif font-bold text-neutral-100 group-hover:text-amber-300 transition-colors">
+                    <span className="text-base font-serif font-bold text-stone-900 group-hover:text-amber-900 transition-colors">
                       {cat.title}
-                    </h3>
-                    <span className="text-[10px] text-neutral-400 font-sans tracking-wider uppercase">
+                    </span>
+                    <span className="text-[10px] text-stone-400 font-sans uppercase">
                       {cat.titleEn}
                     </span>
                   </div>
-                  <p className="text-xs text-neutral-300 font-serif mt-0.5">
+                  <span className="text-xs text-stone-500 font-serif mt-0.5">
                     {cat.desc}
-                  </p>
+                  </span>
                 </div>
               </div>
 
-              {/* Right Arrow */}
-              <div className="relative z-10 text-neutral-500 group-hover:text-amber-300 group-hover:translate-x-1 transition-all">
-                <ArrowRight className="w-5 h-5" />
+              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-amber-50 text-amber-800 opacity-80 group-hover:opacity-100 group-hover:bg-amber-100 transition-all">
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </div>
-            </button>
+            </motion.div>
           );
         })}
       </div>
@@ -182,67 +177,51 @@ export default function QuestionPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsModalOpen(false)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-stone-950/60 backdrop-blur-sm"
             />
 
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative z-10 w-full max-w-sm glass-panel rounded-3xl p-5 border border-amber-400/40 shadow-2xl bg-[#0e1018]"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative z-10 w-full max-w-sm bg-[#FAF8F5] border-2 border-amber-400 rounded-3xl p-5 shadow-2xl space-y-4"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-                <div className="flex items-center gap-2 text-amber-300 font-serif font-bold text-sm">
-                  <span>🔮</span>
-                  <span>请输入你最想知道的问题</span>
+              <div className="flex items-center justify-between border-b border-stone-200 pb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-700" />
+                  <h3 className="text-sm font-serif font-bold text-stone-900">
+                    亲笔书写你的困惑
+                  </h3>
                 </div>
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="p-1 rounded-full text-neutral-400 hover:text-white"
+                  className="p-1 text-stone-400 hover:text-stone-700 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <form onSubmit={handleConfirmCustom} className="mt-4 space-y-4">
-                <div>
-                  <textarea
-                    rows={3}
-                    value={customQuestion}
-                    onChange={(e) => setCustomQuestion(e.target.value)}
-                    placeholder="例如：我未来3个月事业会有什么变化？"
-                    className="w-full p-3 rounded-xl bg-neutral-900/90 border border-neutral-700 text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:border-amber-400 resize-none font-serif leading-relaxed"
-                    autoFocus
-                  />
-                </div>
+              <form onSubmit={handleCustomSubmit} className="space-y-3">
+                <textarea
+                  value={customQuestion}
+                  onChange={(e) => setCustomQuestion(e.target.value)}
+                  placeholder="例如：我准备在今年下半年与朋友合伙创业，未来走势与注意事项如何？"
+                  rows={4}
+                  className="w-full p-3.5 rounded-2xl bg-white border border-amber-300/80 text-stone-900 placeholder:text-stone-400 text-xs font-serif focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-500 transition-all resize-none shadow-inner"
+                  autoFocus
+                />
 
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCustomQuestion('我未来3个月事业会有什么重大转机？');
-                    }}
-                    className="text-[11px] px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-700 text-neutral-300 hover:text-amber-300 transition-colors"
-                  >
-                    事业转机
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCustomQuestion('我和当下的有缘人未来走向如何？');
-                    }}
-                    className="text-[11px] px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-700 text-neutral-300 hover:text-amber-300 transition-colors"
-                  >
-                    情感走向
-                  </button>
+                <div className="flex items-center justify-between text-[11px] text-stone-400 font-serif px-1">
+                  <span>诚心静念 · 意向越明确越吉</span>
+                  <span>{customQuestion.length}/100</span>
                 </div>
 
                 <button
                   type="submit"
                   disabled={!customQuestion.trim()}
-                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-serif font-bold text-sm shadow-lg disabled:opacity-50 disabled:cursor-not-allowed tracking-wider"
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-stone-950 font-serif font-black text-sm shadow-[0_4px_16px_rgba(212,175,55,0.35)] disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all"
                 >
-                  开启专属神谕
+                  进入神谕牌阵
                 </button>
               </form>
             </motion.div>

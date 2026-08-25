@@ -35,8 +35,8 @@ export const NineCardSpread: React.FC<NineCardSpreadProps> = ({
               <div className="text-center mb-1">
                 <span
                   className={cn(
-                    'text-[10px] font-serif font-bold block truncate',
-                    isCenterCard ? 'text-amber-300 font-extrabold' : 'text-amber-300/80'
+                    'text-[10px] font-serif font-black block truncate',
+                    isCenterCard ? 'text-amber-900 font-extrabold' : 'text-stone-700'
                   )}
                 >
                   {item.position.title}
@@ -46,8 +46,8 @@ export const NineCardSpread: React.FC<NineCardSpreadProps> = ({
               {/* Card Container with Center Golden Breathing Light */}
               <div
                 className={cn(
-                  'w-full relative rounded-xl',
-                  isCenterCard && 'animate-glow-breathe rounded-xl'
+                  'w-full relative rounded-2xl',
+                  isCenterCard && 'animate-glow-breathe rounded-2xl shadow-md'
                 )}
                 onClick={() => {
                   if (item.isRevealed && onCardClick) {
@@ -67,10 +67,10 @@ export const NineCardSpread: React.FC<NineCardSpreadProps> = ({
               {/* Quick Card Summary if Revealed */}
               {item.isRevealed && (
                 <div className="mt-1 text-center animate-fade-in">
-                  <span className="text-[9px] font-serif font-semibold text-neutral-200 block truncate">
+                  <span className="text-[9.5px] font-serif font-black text-stone-900 block truncate">
                     {item.card.name}
                   </span>
-                  <span className="text-[7.5px] text-amber-400/80 font-serif">
+                  <span className="text-[8px] text-amber-800 font-serif font-medium">
                     {item.card.elementName} · {item.card.energyTitle}
                   </span>
                 </div>

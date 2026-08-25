@@ -17,8 +17,8 @@ export const CardBack: React.FC<CardBackProps> = ({
   return (
     <div
       className={cn(
-        'relative rounded-xl overflow-hidden bg-gradient-to-b from-[#111319] via-[#090b10] to-[#040508] border border-amber-500/30 flex flex-col items-center justify-between p-3 select-none transition-all duration-300',
-        isGlowing && 'shadow-[0_0_20px_rgba(212,175,55,0.4)] border-amber-400',
+        'relative rounded-2xl overflow-hidden bg-gradient-to-b from-[#1C1814] via-[#2A231C] to-[#14120E] border-2 border-amber-500/50 flex flex-col items-center justify-between p-3 select-none transition-all duration-300 shadow-[0_4px_20px_rgba(180,140,50,0.2)]',
+        isGlowing && 'shadow-[0_0_25px_rgba(212,175,55,0.6)] border-amber-400',
         className
       )}
       style={{
@@ -26,43 +26,41 @@ export const CardBack: React.FC<CardBackProps> = ({
       }}
     >
       {/* Outer Golden Inset Frame */}
-      <div className="absolute inset-1.5 rounded-lg border border-amber-500/20 pointer-events-none" />
-      <div className="absolute inset-2 rounded-md border border-amber-500/10 pointer-events-none" />
+      <div className="absolute inset-1.5 rounded-xl border border-amber-400/40 pointer-events-none" />
+      <div className="absolute inset-2.5 rounded-lg border border-amber-300/20 pointer-events-none" />
 
       {/* Four Corner Ancient Cloud Patterns */}
-      <div className="absolute top-2 left-2 text-[10px] text-amber-400/40 font-serif leading-none">
+      <div className="absolute top-2 left-2 text-[10px] text-amber-300/60 font-serif leading-none">
         ⌜
       </div>
-      <div className="absolute top-2 right-2 text-[10px] text-amber-400/40 font-serif leading-none">
+      <div className="absolute top-2 right-2 text-[10px] text-amber-300/60 font-serif leading-none">
         ⌝
       </div>
-      <div className="absolute bottom-2 left-2 text-[10px] text-amber-400/40 font-serif leading-none">
+      <div className="absolute bottom-2 left-2 text-[10px] text-amber-300/60 font-serif leading-none">
         ⌞
       </div>
-      <div className="absolute bottom-2 right-2 text-[10px] text-amber-400/40 font-serif leading-none">
+      <div className="absolute bottom-2 right-2 text-[10px] text-amber-300/60 font-serif leading-none">
         ⌟
       </div>
 
       {/* Top Lotus Emblem */}
       <div className="w-full flex justify-center pt-1">
-        <svg
-          viewBox="0 0 24 24"
-          className="w-4 h-4 fill-none stroke-amber-400/40 stroke-1"
-        >
-          <path d="M12 2C9 6 6 10 6 15a6 6 0 0 0 12 0c0-5-3-9-6-13z" />
-          <path d="M12 7c-2 3-4 6-4 9a4 4 0 0 0 8 0c0-3-2-6-4-9z" />
-        </svg>
+        <div className="flex items-center gap-1 opacity-60">
+          <span className="w-3 h-px bg-amber-400" />
+          <span className="text-[10px] text-amber-300">🪷</span>
+          <span className="w-3 h-px bg-amber-400" />
+        </div>
       </div>
 
-      {/* Center Sacred Taiji & Tianji 52 Seal */}
+      {/* Center Sacred Taiji & Tianji 52 Mandala */}
       <div className="relative flex flex-col items-center justify-center my-auto">
         {/* Subtle Radial Halo */}
-        <div className="absolute w-20 h-20 rounded-full bg-amber-500/10 blur-md pointer-events-none" />
+        <div className="absolute w-24 h-24 rounded-full bg-amber-400/15 blur-lg pointer-events-none" />
 
         {/* Outer Circular Astrolabe Ring */}
-        <div className="w-14 h-14 rounded-full border border-amber-400/30 flex items-center justify-center bg-black/40 shadow-inner">
-          <div className="w-11 h-11 rounded-full border border-dashed border-amber-400/20 flex items-center justify-center animate-spin-slow">
-            <span className="text-xl text-amber-300 font-serif drop-shadow-[0_0_8px_rgba(212,175,55,0.7)]">
+        <div className="w-14 h-14 rounded-full border-2 border-amber-400/60 flex items-center justify-center bg-gradient-to-br from-amber-950/60 to-black/80 shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+          <div className="w-11 h-11 rounded-full border border-dashed border-amber-300/40 flex items-center justify-center animate-spin-slow">
+            <span className="text-xl text-amber-200 font-serif drop-shadow-[0_0_10px_rgba(212,175,55,0.8)]">
               ☯
             </span>
           </div>
@@ -70,10 +68,10 @@ export const CardBack: React.FC<CardBackProps> = ({
 
         {/* Center Title */}
         <div className="mt-2 text-center">
-          <span className="text-[11px] font-serif font-bold tracking-[0.25em] text-gold-gradient block">
+          <span className="text-xs font-serif font-extrabold tracking-[0.25em] text-amber-200 block drop-shadow-xs">
             天机52
           </span>
-          <span className="text-[7px] tracking-[0.2em] text-neutral-400 uppercase font-mono block -mt-0.5">
+          <span className="text-[7.5px] tracking-[0.25em] text-amber-400/70 uppercase font-mono block font-bold">
             TIANJI 52
           </span>
         </div>
@@ -81,15 +79,15 @@ export const CardBack: React.FC<CardBackProps> = ({
 
       {/* Bottom Lotus / Cloud Filigree */}
       <div className="w-full flex justify-center pb-1">
-        <div className="flex items-center gap-1 opacity-40">
-          <span className="w-2 h-px bg-amber-400" />
-          <span className="w-1 h-1 rounded-full bg-amber-400" />
-          <span className="w-2 h-px bg-amber-400" />
+        <div className="flex items-center gap-1 opacity-60">
+          <span className="w-3 h-px bg-amber-400" />
+          <span className="text-[10px] text-amber-300">🪷</span>
+          <span className="w-3 h-px bg-amber-400" />
         </div>
       </div>
 
       {/* Subtle Shimmer Light Sweep */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-amber-400/5 to-transparent opacity-0 hover:opacity-100 transition-opacity pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-amber-300/10 to-transparent opacity-0 hover:opacity-100 transition-opacity pointer-events-none" />
     </div>
   );
 };

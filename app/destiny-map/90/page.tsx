@@ -11,8 +11,7 @@ import { OracleCard } from '@/components/Cards/OracleCard';
 import { CardDetailModal } from '@/components/Oracle/CardDetailModal';
 import { Storage } from '@/lib/storage';
 import { sound } from '@/lib/sound';
-import { Sparkles, Calendar, TrendingUp, CheckCircle2, ChevronRight, Crown, Layers, Eye, RotateCcw } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, RotateCcw } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export default function NinetyDayDestinyMapPage() {
@@ -26,8 +25,7 @@ export default function NinetyDayDestinyMapPage() {
 
   const handleStartDraw = () => {
     sound.playBassHit();
-    // Check tokens or Pro entitlement
-    const hasPaid = Storage.consumeTokens(50, '开启九十日天机图');
+    Storage.consumeTokens(50, '开启九十日天机图');
     setSelectedCards([]);
     setStage('draw_round1');
   };
@@ -61,7 +59,7 @@ export default function NinetyDayDestinyMapPage() {
       {/* STAGE 1: INTRO */}
       {stage === 'intro' && (
         <div className="flex-1 flex flex-col items-center justify-center text-center space-y-5 animate-fade-in my-auto py-6">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-500/20 via-neutral-900 to-black border-2 border-amber-400/50 flex items-center justify-center text-4xl shadow-[0_0_30px_rgba(212,175,55,0.3)]">
+          <div className="w-20 h-20 rounded-3xl bg-amber-100 border-2 border-amber-400 flex items-center justify-center text-4xl shadow-md">
             🗺️
           </div>
 
@@ -69,38 +67,38 @@ export default function NinetyDayDestinyMapPage() {
             <h2 className="text-2xl font-serif font-extrabold text-gold-gradient tracking-wide">
               九十日全维天机图
             </h2>
-            <p className="text-xs text-amber-300/80 font-serif">
+            <p className="text-xs text-amber-900 font-serif font-semibold">
               3 个月 × 4 维因缘 · 12 张神谕推演未来阶段走势
             </p>
           </div>
 
           {/* 3 Phases Feature Preview */}
-          <div className="w-full glass-panel rounded-2xl p-4 border border-amber-500/20 space-y-2.5 text-left text-xs font-serif">
+          <div className="w-full glass-panel rounded-3xl p-4 border border-amber-300 space-y-2.5 text-left text-xs font-serif shadow-sm">
             <div className="flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-amber-950 border border-amber-500/40 text-amber-300 font-mono text-[10px] flex items-center justify-center">
+              <span className="w-5 h-5 rounded-full bg-amber-100 border border-amber-400 text-amber-900 font-mono text-[10px] font-bold flex items-center justify-center">
                 01
               </span>
-              <span className="text-neutral-200">首月 (1-30天)：事业/财富/情感/内在奠基与防漏</span>
+              <span className="text-stone-800">首月 (1-30天)：事业/财富/情感/内在奠基与防漏</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-amber-950 border border-amber-500/40 text-amber-300 font-mono text-[10px] flex items-center justify-center">
+              <span className="w-5 h-5 rounded-full bg-amber-100 border border-amber-400 text-amber-900 font-mono text-[10px] font-bold flex items-center justify-center">
                 02
               </span>
-              <span className="text-neutral-200">次月 (31-60天)：贵人显现、新机试水与生机破局</span>
+              <span className="text-stone-800">次月 (31-60天)：贵人显现、新机试水与生机破局</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-amber-950 border border-amber-500/40 text-amber-300 font-mono text-[10px] flex items-center justify-center">
+              <span className="w-5 h-5 rounded-full bg-amber-100 border border-amber-400 text-amber-900 font-mono text-[10px] font-bold flex items-center justify-center">
                 03
               </span>
-              <span className="text-neutral-200">季末 (61-90天)：大势成型、成果定鼎与能量丰盛</span>
+              <span className="text-stone-800">季末 (61-90天)：大势成型、成果定鼎与能量丰盛</span>
             </div>
           </div>
 
           <button
             onClick={handleStartDraw}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-serif font-bold text-sm shadow-[0_0_25px_rgba(212,175,55,0.4)] active:scale-95 transition-all flex items-center justify-center gap-2"
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 font-serif font-black text-sm shadow-[0_4px_20px_rgba(212,175,55,0.4)] active:scale-95 transition-all flex items-center justify-center gap-2"
           >
-            <Sparkles className="w-4 h-4 fill-black" />
+            <Sparkles className="w-4 h-4 fill-stone-950" />
             <span>开启 3 轮直觉抽牌 (50令)</span>
           </button>
         </div>
@@ -110,10 +108,10 @@ export default function NinetyDayDestinyMapPage() {
       {stage === 'draw_round1' && (
         <div className="flex-1 flex flex-col items-center space-y-3 animate-fade-in">
           <div className="text-center space-y-1">
-            <span className="px-3 py-1 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 text-xs font-serif">
+            <span className="px-3 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-xs font-serif font-bold shadow-xs">
               第一轮 · 抽选首月 4 张神谕 (事业/财富/感情/内在)
             </span>
-            <p className="text-[11px] text-neutral-400 font-serif">
+            <p className="text-[11px] text-stone-500 font-serif">
               请在下方牌组中连续选取 4 张卡牌
             </p>
           </div>
@@ -129,10 +127,10 @@ export default function NinetyDayDestinyMapPage() {
       {stage === 'draw_round2' && (
         <div className="flex-1 flex flex-col items-center space-y-3 animate-fade-in">
           <div className="text-center space-y-1">
-            <span className="px-3 py-1 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 text-xs font-serif">
+            <span className="px-3 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-xs font-serif font-bold shadow-xs">
               第二轮 · 抽选次月 4 张神谕 (转折与贵人机运)
             </span>
-            <p className="text-[11px] text-neutral-400 font-serif">
+            <p className="text-[11px] text-stone-500 font-serif">
               请继续在牌组中选取 4 张卡牌
             </p>
           </div>
@@ -148,10 +146,10 @@ export default function NinetyDayDestinyMapPage() {
       {stage === 'draw_round3' && (
         <div className="flex-1 flex flex-col items-center space-y-3 animate-fade-in">
           <div className="text-center space-y-1">
-            <span className="px-3 py-1 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 text-xs font-serif">
+            <span className="px-3 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-xs font-serif font-bold shadow-xs">
               第三轮 · 抽选季末 4 张神谕 (大势终局定鼎)
             </span>
-            <p className="text-[11px] text-neutral-400 font-serif">
+            <p className="text-[11px] text-stone-500 font-serif">
               最后选取 4 张卡牌完成九十日推演
             </p>
           </div>
@@ -167,41 +165,41 @@ export default function NinetyDayDestinyMapPage() {
       {stage === 'result' && mapResult && (
         <div className="flex-1 flex flex-col space-y-4 animate-fade-in">
           {/* Hero Overall Trajectory Banner */}
-          <div className="w-full glass-panel rounded-3xl p-5 border border-amber-500/30 relative overflow-hidden shadow-[0_0_30px_rgba(212,175,55,0.15)] space-y-3">
+          <div className="w-full glass-panel rounded-3xl p-5 border border-amber-300 relative overflow-hidden shadow-sm space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-4 rounded-full bg-amber-400" />
-                <h3 className="text-xs font-serif font-bold text-amber-300 uppercase">
+                <span className="w-1.5 h-4 rounded-full bg-amber-600" />
+                <h3 className="text-xs font-serif font-black text-amber-900 uppercase">
                   90日气运演进轨迹
                 </h3>
               </div>
-              <span className="text-[10px] font-mono text-neutral-400">
+              <span className="text-[10px] font-mono text-stone-400">
                 推演于 {mapResult.generatedAt}
               </span>
             </div>
 
-            <h2 className="text-xl font-serif font-extrabold text-gold-gradient tracking-wide">
+            <h2 className="text-xl font-serif font-black text-gold-gradient tracking-wide">
               {mapResult.overallTrajectory}
             </h2>
 
-            <p className="text-xs text-neutral-300 font-serif leading-relaxed bg-neutral-900/60 p-3 rounded-2xl border border-neutral-800">
+            <p className="text-xs text-stone-700 font-serif leading-relaxed bg-amber-50/60 p-3 rounded-2xl border border-amber-200/60">
               “{mapResult.summaryQuote}”
             </p>
 
             <div className="grid grid-cols-2 gap-2 text-xs font-serif">
-              <div className="p-2 rounded-xl bg-neutral-900/80 border border-neutral-800">
-                <span className="text-[10px] text-neutral-400 block">最强爆发月份</span>
-                <span className="text-amber-300 font-bold">{mapResult.peakMonthTitle}</span>
+              <div className="p-2.5 rounded-xl bg-white border border-stone-200 shadow-xs">
+                <span className="text-[10px] text-stone-500 block">最强爆发月份</span>
+                <span className="text-amber-800 font-bold">{mapResult.peakMonthTitle}</span>
               </div>
-              <div className="p-2 rounded-xl bg-neutral-900/80 border border-neutral-800">
-                <span className="text-[10px] text-neutral-400 block">关键调整月份</span>
-                <span className="text-purple-300 font-bold">{mapResult.adjustmentMonthTitle}</span>
+              <div className="p-2.5 rounded-xl bg-white border border-stone-200 shadow-xs">
+                <span className="text-[10px] text-stone-500 block">关键调整月份</span>
+                <span className="text-purple-900 font-bold">{mapResult.adjustmentMonthTitle}</span>
               </div>
             </div>
           </div>
 
           {/* Month Tabs */}
-          <div className="flex items-center gap-1.5 bg-neutral-900/90 p-1 rounded-2xl border border-neutral-800">
+          <div className="flex items-center gap-1.5 bg-white p-1 rounded-2xl border border-stone-200 shadow-xs">
             {mapResult.months.map((m) => (
               <button
                 key={m.monthIndex}
@@ -211,8 +209,8 @@ export default function NinetyDayDestinyMapPage() {
                 }}
                 className={`flex-1 py-2 rounded-xl text-xs font-serif transition-colors ${
                   activeMonthTab === m.monthIndex
-                    ? 'bg-amber-500 text-black font-bold shadow-md'
-                    : 'text-neutral-400 hover:text-neutral-200'
+                    ? 'bg-amber-500 text-stone-950 font-bold shadow-xs'
+                    : 'text-stone-500 hover:text-stone-900'
                 }`}
               >
                 第 {m.monthIndex} 个月
@@ -224,17 +222,17 @@ export default function NinetyDayDestinyMapPage() {
           {(() => {
             const activeMonth = mapResult.months[activeMonthTab - 1];
             return (
-              <div className="w-full glass-panel rounded-3xl p-4 border border-amber-500/20 space-y-3.5">
+              <div className="w-full glass-panel rounded-3xl p-4 border border-amber-300 space-y-3.5 shadow-sm">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-sm font-serif font-bold text-amber-200">
+                    <h4 className="text-sm font-serif font-bold text-stone-900">
                       {activeMonth.monthTitle}
                     </h4>
-                    <span className="text-[10px] text-neutral-400 font-serif">
+                    <span className="text-[10px] text-stone-500 font-serif">
                       阶段主题：{activeMonth.focusTheme}
                     </span>
                   </div>
-                  <span className="text-xs font-mono font-bold text-amber-300 px-2.5 py-1 rounded-full bg-amber-950/60 border border-amber-500/30">
+                  <span className="text-xs font-mono font-bold text-amber-900 px-2.5 py-1 rounded-full bg-amber-100 border border-amber-300">
                     支持度 · {activeMonth.monthlyScore}
                   </span>
                 </div>
@@ -250,21 +248,21 @@ export default function NinetyDayDestinyMapPage() {
                     <div
                       key={idx}
                       onClick={() => setModalCard(item.card)}
-                      className="p-2.5 rounded-2xl bg-neutral-900/80 border border-neutral-800 hover:border-amber-400/50 cursor-pointer transition-all space-y-1.5 group"
+                      className="p-2.5 rounded-2xl bg-white border border-stone-200 hover:border-amber-400 cursor-pointer transition-all space-y-1.5 shadow-xs group"
                     >
-                      <div className="flex items-center justify-between text-[10px] font-serif text-neutral-400">
+                      <div className="flex items-center justify-between text-[10px] font-serif text-stone-500">
                         <span>{item.label}</span>
-                        <span className="text-amber-400 group-hover:scale-105 transition-transform">✦</span>
+                        <span className="text-amber-600 group-hover:scale-105 transition-transform">✦</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-12 rounded-lg bg-neutral-950 border border-amber-500/30 flex items-center justify-center text-xs font-bold text-amber-300">
+                        <div className="w-8 h-12 rounded-lg bg-amber-50 border border-amber-300 flex items-center justify-center text-xs font-bold text-amber-900">
                           {item.card.rank}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <span className="text-xs font-serif font-bold text-neutral-200 truncate block">
+                          <span className="text-xs font-serif font-bold text-stone-900 truncate block">
                             {item.card.cardName}
                           </span>
-                          <span className="text-[9px] text-neutral-400 truncate block">
+                          <span className="text-[9.5px] text-amber-800 truncate block">
                             {item.card.archetype} · {item.card.elementName}
                           </span>
                         </div>
@@ -274,13 +272,13 @@ export default function NinetyDayDestinyMapPage() {
                 </div>
 
                 {/* Action Roadmap */}
-                <div className="space-y-2 pt-2 border-t border-neutral-800">
-                  <span className="text-xs font-serif font-bold text-neutral-300 block">
+                <div className="space-y-2 pt-2 border-t border-stone-200">
+                  <span className="text-xs font-serif font-bold text-stone-900 block">
                     本月行动实操地图 (3大要旨)
                   </span>
                   {activeMonth.actionRoadmap.map((act, i) => (
-                    <div key={i} className="flex items-start gap-2 text-xs font-serif text-neutral-200">
-                      <span className="w-4 h-4 rounded-full bg-amber-950 text-amber-300 border border-amber-500/40 text-[10px] font-mono flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div key={i} className="flex items-start gap-2 text-xs font-serif text-stone-700">
+                      <span className="w-4 h-4 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-mono font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                         {i + 1}
                       </span>
                       <span>{act}</span>
@@ -297,7 +295,7 @@ export default function NinetyDayDestinyMapPage() {
               sound.playCardSelect();
               setStage('intro');
             }}
-            className="w-full py-3.5 rounded-2xl bg-neutral-900 border border-neutral-700 text-neutral-300 font-serif text-xs flex items-center justify-center gap-2 hover:bg-neutral-800 transition-colors"
+            className="w-full py-3.5 rounded-2xl bg-white border border-stone-300 text-stone-700 font-serif font-bold text-xs flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors shadow-xs"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>重新推演九十日天机图</span>

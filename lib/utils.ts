@@ -10,55 +10,55 @@ export function formatElementColor(element: string) {
     case 'wood':
     case '木':
       return {
-        bg: 'bg-emerald-950/60',
-        border: 'border-emerald-500/40',
-        text: 'text-emerald-300',
-        glow: 'shadow-emerald-500/20',
-        accent: '#10B981',
+        bg: 'bg-emerald-50/95',
+        border: 'border-emerald-500/30',
+        text: 'text-emerald-900',
+        glow: 'shadow-emerald-500/10',
+        accent: '#065F46',
       };
     case 'fire':
     case '火':
       return {
-        bg: 'bg-rose-950/60',
-        border: 'border-rose-500/40',
-        text: 'text-rose-300',
-        glow: 'shadow-rose-500/20',
-        accent: '#F43F5E',
+        bg: 'bg-rose-50/95',
+        border: 'border-rose-500/30',
+        text: 'text-rose-900',
+        glow: 'shadow-rose-500/10',
+        accent: '#9F1239',
       };
     case 'earth':
     case '土':
       return {
-        bg: 'bg-amber-950/60',
-        border: 'border-amber-500/40',
-        text: 'text-amber-300',
-        glow: 'shadow-amber-500/20',
-        accent: '#F59E0B',
+        bg: 'bg-amber-50/95',
+        border: 'border-amber-600/30',
+        text: 'text-amber-950',
+        glow: 'shadow-amber-500/10',
+        accent: '#B45309',
       };
     case 'metal':
     case '金':
       return {
-        bg: 'bg-yellow-950/60',
-        border: 'border-yellow-400/50',
-        text: 'text-yellow-200',
-        glow: 'shadow-yellow-400/30',
-        accent: '#EAB308',
+        bg: 'bg-amber-100/70',
+        border: 'border-amber-500/40',
+        text: 'text-amber-950',
+        glow: 'shadow-amber-400/15',
+        accent: '#92400E',
       };
     case 'water':
     case '水':
       return {
-        bg: 'bg-cyan-950/60',
-        border: 'border-cyan-500/40',
-        text: 'text-cyan-300',
-        glow: 'shadow-cyan-500/20',
-        accent: '#06B6D4',
+        bg: 'bg-cyan-50/95',
+        border: 'border-cyan-500/30',
+        text: 'text-cyan-950',
+        glow: 'shadow-cyan-500/10',
+        accent: '#0E7490',
       };
     default:
       return {
-        bg: 'bg-neutral-900/60',
-        border: 'border-neutral-500/40',
-        text: 'text-neutral-300',
-        glow: 'shadow-neutral-500/20',
-        accent: '#D4AF37',
+        bg: 'bg-stone-50/95',
+        border: 'border-stone-300',
+        text: 'text-stone-900',
+        glow: 'shadow-stone-500/10',
+        accent: '#B8860B',
       };
   }
 }
@@ -69,56 +69,71 @@ export function formatSuitInfo(suit: string) {
       return {
         symbol: '♥',
         name: '心界',
-        nameEn: 'Love Realm',
-        color: 'text-rose-400',
-        border: 'border-rose-500/40',
-        bgGradient: 'from-rose-950/50 to-neutral-950',
-        accentColor: '#E11D48',
-        particleColor: ['#E11D48', '#FB7185', '#FDA4AF', '#D4AF37'],
+        nameEn: 'Heart Realm',
+        color: 'text-rose-700',
+        border: 'border-rose-300',
+        bgGradient: 'from-rose-50/80 to-white',
+        accentColor: '#BE123C',
+        particleColor: ['#BE123C', '#FB7185', '#FDA4AF', '#D4AF37'],
       };
     case 'diamond':
       return {
         symbol: '♦',
         name: '财界',
-        nameEn: 'Wealth Realm',
-        color: 'text-amber-300',
-        border: 'border-amber-500/40',
-        bgGradient: 'from-amber-950/50 to-neutral-950',
-        accentColor: '#F59E0B',
-        particleColor: ['#F59E0B', '#FBBF24', '#FDE68A', '#D4AF37'],
+        nameEn: 'Diamond Realm',
+        color: 'text-amber-700',
+        border: 'border-amber-400/50',
+        bgGradient: 'from-amber-50/80 to-white',
+        accentColor: '#B45309',
+        particleColor: ['#B45309', '#FBBF24', '#FDE68A', '#D4AF37'],
       };
     case 'club':
       return {
         symbol: '♣',
         name: '生界',
-        nameEn: 'Growth Realm',
-        color: 'text-emerald-400',
-        border: 'border-emerald-500/40',
-        bgGradient: 'from-emerald-950/50 to-neutral-950',
-        accentColor: '#10B981',
-        particleColor: ['#10B981', '#34D399', '#6EE7B7', '#D4AF37'],
+        nameEn: 'Club Realm',
+        color: 'text-emerald-800',
+        border: 'border-emerald-400/50',
+        bgGradient: 'from-emerald-50/80 to-white',
+        accentColor: '#065F46',
+        particleColor: ['#065F46', '#34D399', '#6EE7B7', '#D4AF37'],
       };
     case 'spade':
       return {
         symbol: '♠',
         name: '玄界',
-        nameEn: 'Destiny Realm',
-        color: 'text-purple-400',
-        border: 'border-purple-500/40',
-        bgGradient: 'from-purple-950/50 to-neutral-950',
-        accentColor: '#A855F7',
-        particleColor: ['#A855F7', '#C084FC', '#E879F9', '#38BDF8'],
+        nameEn: 'Spade Realm',
+        color: 'text-purple-900',
+        border: 'border-purple-300',
+        bgGradient: 'from-purple-50/80 to-white',
+        accentColor: '#581C87',
+        particleColor: ['#581C87', '#C084FC', '#E9D5FF', '#D4AF37'],
       };
     default:
       return {
-        symbol: '✦',
-        name: '神谕',
-        nameEn: 'Oracle',
-        color: 'text-yellow-400',
-        border: 'border-yellow-500/40',
-        bgGradient: 'from-yellow-950/50 to-neutral-950',
-        accentColor: '#D4AF37',
-        particleColor: ['#D4AF37', '#F3E5AB'],
+        symbol: '☯',
+        name: '天界',
+        nameEn: 'Tian Realm',
+        color: 'text-amber-800',
+        border: 'border-amber-400',
+        bgGradient: 'from-amber-50 to-white',
+        accentColor: '#B8860B',
+        particleColor: ['#B8860B', '#D4AF37'],
       };
+  }
+}
+
+export function formatSpreadName(spreadType: string) {
+  switch (spreadType) {
+    case 'single':
+      return '天机一牌 · 随问随占';
+    case 'three':
+      return '三才神谕 · 天人地时';
+    case 'six':
+      return '六合命盘 · 全维推演';
+    case 'nine':
+      return '九宫天命 · 乾坤终局';
+    default:
+      return '神谕占验';
   }
 }

@@ -48,17 +48,17 @@ function ResultContent() {
 
   if (!reading) {
     return (
-      <div className="flex-1 flex flex-col px-4 pt-1 pb-8 space-y-4">
+      <div className="flex-1 flex flex-col px-4 pt-1 pb-8 space-y-4 select-none">
         <TopHeader title="命盘结果" />
-        <div className="flex-1 flex flex-col items-center justify-center text-center p-6 glass-panel rounded-2xl border border-neutral-800">
-          <span className="text-4xl mb-3">☯</span>
-          <h2 className="text-base font-serif font-bold text-amber-200">暂无可显示的命盘结果</h2>
-          <p className="text-xs text-neutral-400 font-serif mt-1">
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-6 glass-panel rounded-3xl border border-amber-300 shadow-sm">
+          <span className="text-4xl mb-3 text-amber-700">☯</span>
+          <h2 className="text-base font-serif font-bold text-stone-900">暂无可显示的命盘结果</h2>
+          <p className="text-xs text-stone-500 font-serif mt-1">
             请先开启今日神谕抽牌
           </p>
           <button
             onClick={() => router.push('/question')}
-            className="mt-4 px-6 py-2.5 rounded-full bg-amber-500 text-black font-serif font-bold text-xs"
+            className="mt-4 px-6 py-2.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 font-serif font-black text-xs shadow-xs"
           >
             开启抽牌 ✦
           </button>
@@ -68,12 +68,12 @@ function ResultContent() {
   }
 
   return (
-    <div className="flex-1 flex flex-col px-4 pt-1 pb-8 space-y-4">
+    <div className="flex-1 flex flex-col px-4 pt-1 pb-8 space-y-4 select-none">
       <TopHeader title="天机命盘 · 释卦" showBack onBack={() => router.push('/history')} />
 
       {/* Cards array grid */}
       <div className="w-full">
-        <span className="text-xs font-serif font-bold text-neutral-300 mb-2 block">
+        <span className="text-xs font-serif font-bold text-stone-900 mb-2 block">
           本次卦象圣相 ({reading.cards.length} 张)
         </span>
         <div className="grid grid-cols-3 gap-2">
@@ -103,13 +103,14 @@ function ResultContent() {
             sound.playCardSelect();
             router.push('/question');
           }}
-          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-serif font-bold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+          className="w-full py-3.5 rounded-2xl bg-white hover:bg-stone-50 border border-stone-300 text-stone-800 font-serif font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
         >
-          <RotateCcw className="w-4 h-4" />
-          <span>问另一事 · 开启新神谕</span>
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span>问另一事 · 重新起卦</span>
         </button>
       </div>
 
+      {/* Card Detail Modal */}
       <CardDetailModal
         card={modalCard}
         onClose={() => setModalCard(null)}
@@ -120,7 +121,7 @@ function ResultContent() {
 
 export default function ResultPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-amber-300">正在推演天机...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-amber-800 font-serif text-xs">正在载入命盘...</div>}>
       <ResultContent />
     </Suspense>
   );

@@ -46,7 +46,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, onS
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-black/85 backdrop-blur-md"
+          className="absolute inset-0 bg-stone-950/60 backdrop-blur-sm"
         />
 
         {/* Modal Window */}
@@ -54,22 +54,22 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, onS
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative z-10 w-full max-w-[390px] max-h-[90vh] bg-gradient-to-b from-[#161922] via-[#0d0f16] to-[#07080c] border border-amber-500/40 rounded-3xl p-5 shadow-[0_0_50px_rgba(212,175,55,0.25)] overflow-y-auto space-y-4"
+          className="relative z-10 w-full max-w-[390px] max-h-[90vh] bg-[#FAF8F5] border-2 border-amber-400 rounded-3xl p-5 shadow-2xl overflow-y-auto space-y-4"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
+          <div className="flex items-center justify-between border-b border-stone-200 pb-2">
             <div className="flex items-center gap-2">
-              <Crown className="w-4 h-4 text-amber-400" />
-              <h3 className="text-sm font-serif font-bold text-amber-200">
+              <Crown className="w-4 h-4 text-amber-700" />
+              <h3 className="text-sm font-serif font-bold text-stone-900">
                 解锁更深层的天机
               </h3>
             </div>
-            <button onClick={onClose} className="p-1 text-neutral-400 hover:text-white">
+            <button onClick={onClose} className="p-1 text-stone-400 hover:text-stone-800">
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          <p className="text-[11px] text-neutral-300 font-serif leading-relaxed text-center">
+          <p className="text-[11px] text-stone-600 font-serif leading-relaxed text-center">
             升级至高级会员，开启九宫大阵、AI 深度推演、30 日命势报告与长远天机年鉴。
           </p>
 
@@ -84,35 +84,34 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, onS
                   onClick={() => setSelectedTier(t)}
                   className={`p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden ${
                     isSelected
-                      ? 'bg-gradient-to-r from-amber-950/40 via-neutral-900 to-neutral-950 border-amber-400 shadow-[0_0_15px_rgba(212,175,55,0.2)]'
-                      : 'bg-neutral-900/60 border-neutral-800 hover:border-neutral-700'
+                      ? 'bg-gradient-to-r from-amber-100 via-white to-amber-50 border-amber-500 shadow-sm'
+                      : 'bg-white border-stone-200 hover:border-amber-300'
                   }`}
                 >
                   {t === 'pro' && (
-                    <span className="absolute top-0 right-0 px-2 py-0.5 rounded-bl-xl bg-amber-500 text-black text-[9px] font-bold font-mono">
+                    <span className="absolute top-0 right-0 px-2 py-0.5 rounded-bl-xl bg-amber-500 text-stone-950 text-[9px] font-black font-mono">
                       RECOMMENDED
                     </span>
                   )}
 
                   <div className="flex items-center justify-between mb-2">
                     <div>
-                      <h4 className="text-xs font-serif font-bold text-amber-200">{cfg.name}</h4>
-                      <span className="text-base font-mono font-extrabold text-gold-gradient">{cfg.price}</span>
+                      <h4 className="text-xs font-serif font-bold text-stone-900">{cfg.name}</h4>
+                      <span className="text-base font-mono font-black text-amber-800">{cfg.price}</span>
                     </div>
-                    <div
-                      className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                        isSelected ? 'border-amber-400 bg-amber-500 text-black' : 'border-neutral-700'
-                      }`}
-                    >
+
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center border ${
+                      isSelected ? 'bg-amber-500 border-amber-500 text-stone-950 shadow-xs' : 'border-stone-300'
+                    }`}>
                       {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>
                   </div>
 
-                  <ul className="text-[11px] font-serif text-neutral-300 space-y-1">
-                    {cfg.features.map((f, idx) => (
+                  <ul className="space-y-1 text-[11px] text-stone-600 font-serif">
+                    {cfg.features.map((feat, idx) => (
                       <li key={idx} className="flex items-center gap-1.5">
-                        <Sparkles className="w-3 h-3 text-amber-400 flex-shrink-0" />
-                        <span>{f}</span>
+                        <Sparkles className="w-3 h-3 text-amber-600 flex-shrink-0" />
+                        <span>{feat}</span>
                       </li>
                     ))}
                   </ul>
@@ -121,31 +120,28 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, onS
             })}
           </div>
 
-          {/* Security note */}
-          <div className="flex items-center justify-center gap-1 text-[10px] font-serif text-neutral-400">
-            <Shield className="w-3 h-3 text-emerald-400" />
-            <span>随时可取消订阅 · 演示环境模拟开通</span>
-          </div>
+          {/* Upgrade CTA */}
+          <button
+            onClick={() => handleUpgrade(selectedTier)}
+            disabled={isSuccess}
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-stone-950 font-serif font-black text-xs shadow-[0_4px_20px_rgba(212,175,55,0.4)] active:scale-95 transition-all flex items-center justify-center gap-1.5"
+          >
+            {isSuccess ? (
+              <>
+                <Check className="w-4 h-4" />
+                <span>恭喜！特权已成功开启</span>
+              </>
+            ) : (
+              <>
+                <Zap className="w-4 h-4 fill-stone-950" />
+                <span>立即开启 {TIER_CONFIGS[selectedTier].name} 特权</span>
+              </>
+            )}
+          </button>
 
-          {/* Action Button */}
-          <div className="pt-1">
-            <button
-              onClick={() => handleUpgrade(selectedTier)}
-              disabled={isSuccess}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-serif font-bold text-xs shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
-            >
-              {isSuccess ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  <span>天机特权开通成功！</span>
-                </>
-              ) : (
-                <>
-                  <Crown className="w-4 h-4 fill-black" />
-                  <span>立即结缘开通 {TIER_CONFIGS[selectedTier].badge} 尊享特权</span>
-                </>
-              )}
-            </button>
+          <div className="flex items-center justify-center gap-1 text-[10px] text-stone-400 font-serif">
+            <Shield className="w-3 h-3" />
+            <span>随时可取消 · 安全结缘承诺</span>
           </div>
         </motion.div>
       </div>
