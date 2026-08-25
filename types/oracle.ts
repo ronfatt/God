@@ -36,6 +36,7 @@ export interface OracleCardData extends TianjiCard {
   energyLevel: number; // 1-5 星级
   energyTitle: string; // 天赐 / 顺势 / 平衡 / 考验 / 转化
   gradient: string;
+  image?: string; // 52张高精圣相立绘路径
   advice?: string;
   oracleMessage?: string;
 }

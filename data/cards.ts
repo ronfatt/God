@@ -1051,6 +1051,7 @@ export const ORACLE_CARDS: OracleCardData[] = TIANJI_52_CARDS.map((card) => {
     energyLevel: energy.level,
     energyTitle: energy.title,
     gradient: GRADIENT_MAP[card.suit] || 'from-neutral-900 to-neutral-950',
+    image: `/cards/${card.id}.jpg`,
     advice: card.upright,
     oracleMessage: card.oracle,
   };
