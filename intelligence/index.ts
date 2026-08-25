@@ -1,4 +1,12 @@
-import { OracleCardData, SpreadType, QuestionCategory, ReadingAnalysis } from '@/types/oracle';
+import {
+  OracleCardData,
+  SpreadType,
+  QuestionCategory,
+  ReadingAnalysis,
+  CardOrientation,
+  CardManifestationResult,
+  OverallManifestationResult,
+} from '@/types/oracle';
 import { classifyQuestion, ClassifiedQuestion } from './questionClassifier';
 import { buildReadingContext, ReadingContext } from './readingContext';
 import { detectCombinations, CombinationResult } from './combinationEngine';
@@ -13,6 +21,7 @@ import { calculateZodiacFromYear } from '@/personal/zodiacEngine';
 import { calculatePersonalElementProfile, PersonalElementProfile } from '@/personal/personalElementEngine';
 import { applyPersonalModifier, PersonalModificationResult } from '@/personal/personalModifier';
 import { BirthProfile } from '@/personal/birthProfile';
+import { runManifestationEngine } from './manifestation';
 
 export interface IntelligenceReadingResult extends ReadingAnalysis {
   // Enhanced Intelligence V2 Fields
@@ -31,6 +40,10 @@ export interface IntelligenceReadingResult extends ReadingAnalysis {
   personalElementProfile: PersonalElementProfile;
   personalModification: PersonalModificationResult;
   isPrivate?: boolean;
+
+  // V5 Manifestation Additions
+  cardManifestations: CardManifestationResult[];
+  overallManifestation: OverallManifestationResult;
 }
 
 export function runIntelligenceEngine(
@@ -43,7 +56,8 @@ export function runIntelligenceEngine(
   history: ReadingAnalysis[] = [],
   birthProfile?: BirthProfile,
   isPrivate = false,
-  activeNarrativeMode: NarrativeMode = 'standard'
+  activeNarrativeMode: NarrativeMode = 'standard',
+  orientations: CardOrientation[] = []
 ): IntelligenceReadingResult {
   // Step 1: Classify Question
   const questionClassified = classifyQuestion(question, category);
@@ -84,7 +98,46 @@ export function runIntelligenceEngine(
     momentumAnalysis.type
   );
 
-  // Step 9: Narrative Builder (Supporting 5 modes)
+  // Step 9: V5 Manifestation Engine (光相 / 平相 / 影相 / 转化相)
+  const elementCounts = {
+    wood: elementsAnalysis.counts.wood || 0,
+    fire: elementsAnalysis.counts.fire || 0,
+    earth: elementsAnalysis.counts.earth || 0,
+    metal: elementsAnalysis.counts.metal || 0,
+    water: elementsAnalysis.counts.water || 0,
+  };
+  const yangRatio = yinYangAnalysis.yangPercent / 100;
+  const yinRatio = yinYangAnalysis.yinPercent / 100;
+
+  const positions = readingContext.positionAnalyses.map((p) => ({
+    id: p.positionId,
+    title: p.positionTitle,
+    subtitle: '',
+    description: '',
+    isObstacle: p.positionId.includes('obstacle') || p.positionId === 'pos-6',
+  }));
+
+  const combinationScore = combinationsAnalysis.length > 0 ? (combinationsAnalysis[0].scoreModifier || 10) : 0;
+
+  const { cardManifestations, overallManifestation } = runManifestationEngine(
+    cards,
+    positions,
+    questionClassified.domain,
+    questionClassified.intent,
+    elementCounts,
+    yangRatio,
+    yinRatio,
+    orientations,
+    birthProfile,
+    combinationScore
+  );
+
+  // Attach Manifestation Result to each card
+  cards.forEach((card, idx) => {
+    card.manifestationResult = cardManifestations[idx];
+  });
+
+  // Step 10: Narrative Builder (Supporting 5 modes)
   const narrativeAnalysis = buildNarrative(
     cards,
     questionClassified,
@@ -97,7 +150,7 @@ export function runIntelligenceEngine(
     activeNarrativeMode
   );
 
-  // Step 10: Follow-up Engine
+  // Step 11: Follow-up Engine
   const followUpOptions = generateFollowUps(
     questionClassified.domain,
     questionClassified.subCategory,
@@ -105,7 +158,7 @@ export function runIntelligenceEngine(
     cards
   );
 
-  // Step 11: V3 Personal Modifier Layer
+  // Step 12: V3 Personal Modifier Layer
   const birthYear = birthProfile?.birthDate ? parseInt(birthProfile.birthDate.split('-')[0], 10) : 1996;
   const zodiac = calculateZodiacFromYear(birthYear);
   const personalElementProfile = calculatePersonalElementProfile(zodiac, history);
@@ -117,7 +170,12 @@ export function runIntelligenceEngine(
     question: isPrivate ? '🔒 私密问卦' : question,
     category,
     spreadType,
-    cards: cards.map((c, i) => ({ positionId: `pos_${i}`, cardId: c.id })),
+    cards: cards.map((c, i) => ({
+      positionId: `pos_${i}`,
+      cardId: c.id,
+      manifestation: cardManifestations[i]?.manifestation,
+      manifestationScore: cardManifestations[i]?.manifestationScore,
+    })),
     overallScore: scoreAnalysis.overall,
     wealthScore: scoreAnalysis.wealth,
     careerScore: scoreAnalysis.career,
@@ -153,6 +211,8 @@ export function runIntelligenceEngine(
     scoreAnalysis,
     narrativeAnalysis,
     followUpOptions,
+    cardManifestations,
+    overallManifestation,
   } as IntelligenceReadingResult;
 
   const personalModification = applyPersonalModifier(
@@ -175,6 +235,8 @@ export function runIntelligenceEngine(
     cards: cards.map((c, i) => ({
       positionId: `pos_${i}`,
       cardId: c.id,
+      manifestation: cardManifestations[i]?.manifestation,
+      manifestationScore: cardManifestations[i]?.manifestationScore,
     })),
     overallScore: scoreAnalysis.overall,
     wealthScore: scoreAnalysis.wealth,
@@ -222,6 +284,10 @@ export function runIntelligenceEngine(
     personalElementProfile,
     personalModification,
     isPrivate,
+
+    // V5 Manifestation Layer
+    cardManifestations,
+    overallManifestation,
   };
 }
 
@@ -236,3 +302,4 @@ export * from './scoreEngine';
 export * from './followUpEngine';
 export * from './historyInsightEngine';
 export * from './narrativeBuilder';
+export * from './manifestation';

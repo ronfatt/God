@@ -9,7 +9,90 @@ export type QuestionCategory = 'love' | 'wealth' | 'career' | 'relationship' | '
 export type QuestionDomain = 'love' | 'career' | 'wealth' | 'relationship' | 'life' | 'decision';
 export type QuestionIntent = 'future' | 'decision' | 'outcome' | 'obstacle' | 'opportunity' | 'timing' | 'person' | 'advice';
 
-// 官方天机卡牌数据库模型
+// =========================================================
+// V5 Manifestation Types (光相 / 平相 / 影相 / 转化相)
+// =========================================================
+
+export type ManifestationType = 'light' | 'neutral' | 'shadow' | 'transformative';
+export type CardOrientation = 'upright' | 'reversed';
+
+export interface ManifestationDomainDetail {
+  meaning: string;
+  keywords: string[];
+  love: string;
+  career: string;
+  wealth: string;
+  life: string;
+}
+
+export interface CardManifestation {
+  light: ManifestationDomainDetail;
+  neutral: ManifestationDomainDetail;
+  shadow: ManifestationDomainDetail;
+  transformative: ManifestationDomainDetail;
+}
+
+export interface ManifestationBreakdown {
+  base: number;
+  position: number;
+  question: number;
+  elementRelation: number;
+  elementBalance: number;
+  yinYang: number;
+  neighbors: number;
+  combinations: number;
+  personal: number;
+  orientation: number;
+  finalScore: number;
+}
+
+export interface CardManifestationResult {
+  cardId: string;
+  cardName: string;
+  archetype: string;
+  manifestation: ManifestationType;
+  manifestationScore: number; // -100 to +100
+  supportScore: number; // 0 - 100
+  challengeScore: number; // 0 - 100
+  utilityScore: number; // 0 - 100
+  confidence: 'low' | 'medium' | 'high';
+  mainMeaning: string;
+  domainMeaning: string;
+  reasonCodes: string[];
+  breakdown: ManifestationBreakdown;
+  orientation?: CardOrientation;
+}
+
+export type OverallManifestationState = 
+  | 'light_dominant' 
+  | 'shadow_dominant' 
+  | 'transformative_dominant' 
+  | 'neutral_dominant' 
+  | 'mixed' 
+  | 'contradiction';
+
+export interface OverallManifestationResult {
+  state: OverallManifestationState;
+  title: string;
+  subtitle: string;
+  summary: string;
+  lightCount: number;
+  neutralCount: number;
+  shadowCount: number;
+  transformativeCount: number;
+  averageManifestationScore: number;
+  averageSupport: number;
+  averageChallenge: number;
+  averageUtility: number;
+  contradiction?: {
+    detected: boolean;
+    conflictType: string;
+    description: string;
+    advice: string;
+  };
+}
+
+// 官方天机卡牌数据库模型 (含 V5 扩展)
 export type TianjiCard = {
   id: string;
   suit: Suit;
@@ -21,6 +104,9 @@ export type TianjiCard = {
   element: Element;
   yinYang: YinYang;
   keywords: string[];
+  coreNature?: string[]; // V5 核心本质 (永恒不变的核心力量)
+  baseScore?: number; // V5 初始基准分 (-10 ~ +10)
+  manifestation?: CardManifestation; // V5 四相显化释义模型
   upright: string;
   shadow: string;
   love: string;
@@ -39,6 +125,7 @@ export interface OracleCardData extends TianjiCard {
   image?: string; // 52张高精圣相立绘路径
   advice?: string;
   oracleMessage?: string;
+  manifestationResult?: CardManifestationResult; // V5 当次运算生成的显相结果
 }
 
 export interface SpreadPosition {
@@ -47,6 +134,7 @@ export interface SpreadPosition {
   subtitle: string;
   description: string;
   gridArea?: string;
+  isObstacle?: boolean;
 }
 
 export interface SpreadConfig {
@@ -64,6 +152,8 @@ export interface CardDrawResult {
   position: SpreadPosition;
   card: OracleCardData;
   isRevealed: boolean;
+  orientation?: CardOrientation;
+  manifestationResult?: CardManifestationResult;
 }
 
 export interface ReadingAnalysis {
@@ -73,7 +163,13 @@ export interface ReadingAnalysis {
   question: string;
   category: QuestionCategory;
   spreadType: SpreadType;
-  cards: { positionId: string; cardId: string }[];
+  cards: { 
+    positionId: string; 
+    cardId: string; 
+    manifestation?: ManifestationType; 
+    manifestationScore?: number;
+    orientation?: CardOrientation;
+  }[];
   overallScore: number;
   wealthScore: number;
   careerScore: number;
@@ -99,6 +195,9 @@ export interface ReadingAnalysis {
     element: string;
     number: number;
   };
+  // V5 Manifestation Additions
+  overallManifestation?: OverallManifestationResult;
+  cardManifestations?: CardManifestationResult[];
 }
 
 export interface UserProfile {
