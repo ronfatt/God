@@ -41,16 +41,16 @@ export const OracleCard: React.FC<OracleCardProps> = ({
     <div
       onClick={onClick}
       className={cn(
-        'group relative rounded-2xl overflow-hidden border-2 transition-all duration-300 select-none shadow-[0_4px_16px_rgba(180,140,50,0.18)]',
-        'hover:shadow-[0_10px_30px_rgba(212,175,55,0.4)] hover:-translate-y-1',
-        card.suit === 'heart' && 'border-rose-400/60 hover:border-rose-400',
-        card.suit === 'diamond' && 'border-amber-400/80 hover:border-amber-300',
-        card.suit === 'club' && 'border-emerald-400/60 hover:border-emerald-400',
-        card.suit === 'spade' && 'border-purple-400/60 hover:border-purple-400',
+        'group relative rounded-2xl overflow-hidden border-2 transition-all duration-300 select-none shadow-[0_4px_18px_rgba(180,140,50,0.18)]',
+        'hover:shadow-[0_10px_30px_rgba(212,175,55,0.45)] hover:-translate-y-1',
+        card.suit === 'heart' && 'border-rose-400/80 hover:border-rose-400',
+        card.suit === 'diamond' && 'border-amber-400 hover:border-amber-300',
+        card.suit === 'club' && 'border-emerald-400/80 hover:border-emerald-400',
+        card.suit === 'spade' && 'border-purple-400/80 hover:border-purple-400',
         className
       )}
       style={{
-        aspectRatio: '2/3.5',
+        aspectRatio: '129/246',
       }}
     >
       {/* 1. Genuine Sacred High-Res Card Artwork Face */}

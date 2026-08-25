@@ -17,72 +17,72 @@ export const CardBack: React.FC<CardBackProps> = ({
   return (
     <div
       className={cn(
-        'relative rounded-2xl overflow-hidden bg-gradient-to-b from-[#1C1814] via-[#2A231C] to-[#14120E] border-2 border-amber-500/50 flex flex-col items-center justify-between p-3 select-none transition-all duration-300 shadow-[0_4px_20px_rgba(180,140,50,0.2)]',
-        isGlowing && 'shadow-[0_0_25px_rgba(212,175,55,0.6)] border-amber-400',
+        'relative rounded-2xl overflow-hidden bg-gradient-to-b from-[#1E1914] via-[#2D241C] to-[#14110E] border-2 border-amber-500/60 flex flex-col items-center justify-between p-3 select-none transition-all duration-300 shadow-[0_4px_20px_rgba(180,140,50,0.22)]',
+        isGlowing && 'shadow-[0_0_28px_rgba(212,175,55,0.65)] border-amber-400 ring-2 ring-amber-300/40',
         className
       )}
       style={{
-        aspectRatio: '2/3',
+        aspectRatio: '129/246',
       }}
     >
-      {/* Outer Golden Inset Frame */}
+      {/* Outer Golden Inset Filigree Frame */}
       <div className="absolute inset-1.5 rounded-xl border border-amber-400/40 pointer-events-none" />
       <div className="absolute inset-2.5 rounded-lg border border-amber-300/20 pointer-events-none" />
 
-      {/* Four Corner Ancient Cloud Patterns */}
-      <div className="absolute top-2 left-2 text-[10px] text-amber-300/60 font-serif leading-none">
+      {/* Four Corner Ancient Cloud Motifs */}
+      <div className="absolute top-2 left-2 text-[10px] text-amber-300/70 font-serif leading-none select-none">
         ⌜
       </div>
-      <div className="absolute top-2 right-2 text-[10px] text-amber-300/60 font-serif leading-none">
+      <div className="absolute top-2 right-2 text-[10px] text-amber-300/70 font-serif leading-none select-none">
         ⌝
       </div>
-      <div className="absolute bottom-2 left-2 text-[10px] text-amber-300/60 font-serif leading-none">
+      <div className="absolute bottom-2 left-2 text-[10px] text-amber-300/70 font-serif leading-none select-none">
         ⌞
       </div>
-      <div className="absolute bottom-2 right-2 text-[10px] text-amber-300/60 font-serif leading-none">
+      <div className="absolute bottom-2 right-2 text-[10px] text-amber-300/70 font-serif leading-none select-none">
         ⌟
       </div>
 
-      {/* Top Lotus Emblem */}
-      <div className="w-full flex justify-center pt-1">
-        <div className="flex items-center gap-1 opacity-60">
-          <span className="w-3 h-px bg-amber-400" />
-          <span className="text-[10px] text-amber-300">🪷</span>
-          <span className="w-3 h-px bg-amber-400" />
+      {/* Top Lotus Crest */}
+      <div className="w-full flex justify-center pt-1 relative z-10">
+        <div className="flex items-center gap-1.5 opacity-70">
+          <span className="w-3.5 h-px bg-amber-400" />
+          <span className="text-[11px] text-amber-300">🪷</span>
+          <span className="w-3.5 h-px bg-amber-400" />
         </div>
       </div>
 
       {/* Center Sacred Taiji & Tianji 52 Mandala */}
-      <div className="relative flex flex-col items-center justify-center my-auto">
-        {/* Subtle Radial Halo */}
-        <div className="absolute w-24 h-24 rounded-full bg-amber-400/15 blur-lg pointer-events-none" />
+      <div className="relative flex flex-col items-center justify-center my-auto z-10">
+        {/* Ambient Radial Halo */}
+        <div className="absolute w-24 h-24 rounded-full bg-amber-400/20 blur-lg pointer-events-none" />
 
         {/* Outer Circular Astrolabe Ring */}
-        <div className="w-14 h-14 rounded-full border-2 border-amber-400/60 flex items-center justify-center bg-gradient-to-br from-amber-950/60 to-black/80 shadow-[0_0_15px_rgba(212,175,55,0.3)]">
-          <div className="w-11 h-11 rounded-full border border-dashed border-amber-300/40 flex items-center justify-center animate-spin-slow">
-            <span className="text-xl text-amber-200 font-serif drop-shadow-[0_0_10px_rgba(212,175,55,0.8)]">
+        <div className="w-14 h-14 rounded-full border-2 border-amber-400/80 flex items-center justify-center bg-gradient-to-br from-amber-950/80 via-[#261E16] to-black shadow-[0_0_16px_rgba(212,175,55,0.4)]">
+          <div className="w-11 h-11 rounded-full border border-dashed border-amber-300/50 flex items-center justify-center animate-spin-slow">
+            <span className="text-2xl text-amber-200 font-serif drop-shadow-[0_0_10px_rgba(212,175,55,0.8)]">
               ☯
             </span>
           </div>
         </div>
 
         {/* Center Title */}
-        <div className="mt-2 text-center">
-          <span className="text-xs font-serif font-extrabold tracking-[0.25em] text-amber-200 block drop-shadow-xs">
+        <div className="mt-2.5 text-center space-y-0.5">
+          <span className="text-xs font-serif font-black tracking-[0.25em] text-amber-200 block drop-shadow-xs">
             天机52
           </span>
-          <span className="text-[7.5px] tracking-[0.25em] text-amber-400/70 uppercase font-mono block font-bold">
-            TIANJI 52
+          <span className="text-[7.5px] tracking-[0.3em] text-amber-400/80 uppercase font-mono block font-bold">
+            EASTERN ORACLE
           </span>
         </div>
       </div>
 
-      {/* Bottom Lotus / Cloud Filigree */}
-      <div className="w-full flex justify-center pb-1">
-        <div className="flex items-center gap-1 opacity-60">
-          <span className="w-3 h-px bg-amber-400" />
-          <span className="text-[10px] text-amber-300">🪷</span>
-          <span className="w-3 h-px bg-amber-400" />
+      {/* Bottom Lotus Crest */}
+      <div className="w-full flex justify-center pb-1 relative z-10">
+        <div className="flex items-center gap-1.5 opacity-70">
+          <span className="w-3.5 h-px bg-amber-400" />
+          <span className="text-[11px] text-amber-300">🪷</span>
+          <span className="w-3.5 h-px bg-amber-400" />
         </div>
       </div>
 

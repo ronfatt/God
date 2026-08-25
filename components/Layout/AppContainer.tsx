@@ -39,7 +39,7 @@ export const AppContainer: React.FC<AppContainerProps> = ({ children }) => {
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
 
       {/* Main Mobile-First Frame (390-440px width) with Warm Sacred Rice-White Silk */}
-      <main className="relative z-10 w-full max-w-[440px] min-h-screen bg-[#FAF8F5] border-x border-amber-900/10 shadow-[0_0_50px_rgba(180,140,50,0.12)] flex flex-col pb-20">
+      <main className="relative z-10 w-full max-w-[440px] min-h-screen bg-[#FAF8F5] border-x border-amber-900/10 shadow-[0_0_50px_rgba(180,140,50,0.12)] flex flex-col pb-24">
         {/* Dynamic Background Sacred Taiji Watermark & Ambient Sunbeam */}
         <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[440px] h-full pointer-events-none overflow-hidden z-0">
           {/* Subtle Golden Taiji Watermark */}
