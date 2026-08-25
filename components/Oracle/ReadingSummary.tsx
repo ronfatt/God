@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { IntelligenceReadingResult } from '@/intelligence';
+import { IntelligenceReadingResult, NarrativeMode } from '@/intelligence';
 import {
   Sparkles,
   Compass,
@@ -21,10 +21,16 @@ import {
   Tag,
   Code,
   X,
+  Share2,
+  TrendingUp,
+  Crown,
+  UserCheck,
 } from 'lucide-react';
 import { formatElementColor } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
+import { ShareCardModal } from '@/components/Sharing/ShareCardModal';
+import { PaywallModal } from '@/components/Premium/PaywallModal';
 
 interface ReadingSummaryProps {
   reading: IntelligenceReadingResult;
@@ -35,15 +41,17 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
   const searchParams = useSearchParams();
   const isDebugMode = searchParams.get('debug') === 'true';
 
+  const [activeNarrativeMode, setActiveNarrativeMode] = useState<NarrativeMode>('standard');
   const [isExplainModalOpen, setIsExplainModalOpen] = useState(false);
+  const [isPersonalExplainOpen, setIsPersonalExplainOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [selectedExplainCombo, setSelectedExplainCombo] = useState(reading.combinationsAnalysis?.[0] || null);
 
-  // Accordion toggle states for long content
+  // Accordions
   const [showElementsAccordion, setShowElementsAccordion] = useState(true);
-  const [showCardsAccordion, setShowCardsAccordion] = useState(false);
   const [showDomainAccordion, setShowDomainAccordion] = useState(true);
 
-  const dominantElementStyle = formatElementColor(reading.dominantElement);
   const momentum = reading.momentumAnalysis;
   const scores = reading.scoreAnalysis;
   const elements = reading.elementsAnalysis;
@@ -51,6 +59,9 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
   const timing = reading.timingAnalysis;
   const narrative = reading.narrativeAnalysis;
   const combos = reading.combinationsAnalysis || [];
+  const personalMod = reading.personalModification;
+
+  const currentNarrativeText = narrative.modeNarratives?.[activeNarrativeMode] || narrative.synthesisNarrative;
 
   return (
     <div className="w-full space-y-4 select-none">
@@ -67,9 +78,16 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
               本次天机 · 核心总纲
             </h3>
           </div>
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-serif border border-amber-500/30 bg-amber-950/40 text-amber-300">
-            置信度 · {scores.confidence === 'high' ? '极高' : '良好'}
-          </span>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setIsShareModalOpen(true)}
+              className="px-2 py-0.5 rounded-full text-[10px] font-serif border border-amber-500/40 bg-amber-950/60 text-amber-300 hover:bg-amber-900 flex items-center gap-1 transition-colors"
+            >
+              <Share2 className="w-3 h-3" />
+              <span>分享海报</span>
+            </button>
+          </div>
         </div>
 
         {/* Hero Title & Subtitle */}
@@ -80,14 +98,40 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
           {narrative.coreTheme.subtitle}
         </p>
 
-        <p className="text-sm font-serif text-neutral-200 leading-relaxed bg-neutral-900/60 p-3.5 rounded-2xl border border-neutral-800">
-          “{narrative.synthesisNarrative.split('\n\n')[0]}”
-        </p>
+        {/* Narrative Mode Selector */}
+        <div className="flex items-center gap-1.5 mb-3 overflow-x-auto pb-1">
+          {(
+            [
+              { key: 'standard', label: '标准' },
+              { key: 'concise', label: '简洁' },
+              { key: 'deep', label: '深度' },
+              { key: 'action', label: '行动' },
+              { key: 'rational', label: '理性' },
+            ] as { key: NarrativeMode; label: string }[]
+          ).map((m) => (
+            <button
+              key={m.key}
+              onClick={() => setActiveNarrativeMode(m.key)}
+              className={`px-2.5 py-0.5 rounded-full text-[10px] font-serif transition-colors flex-shrink-0 ${
+                activeNarrativeMode === m.key
+                  ? 'bg-amber-500 text-black font-bold'
+                  : 'bg-neutral-900 text-neutral-400 border border-neutral-800 hover:text-neutral-200'
+              }`}
+            >
+              {m.label}解读
+            </button>
+          ))}
+        </div>
+
+        {/* Dynamic Mode Synthesis Paragraph */}
+        <div className="text-sm font-serif text-neutral-200 leading-relaxed bg-neutral-900/60 p-3.5 rounded-2xl border border-neutral-800 whitespace-pre-line">
+          {currentNarrativeText}
+        </div>
 
         {/* 3 Core Index Badges */}
         <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-neutral-800/80 text-center">
           <div className="p-2 rounded-xl bg-neutral-900/80 border border-amber-500/20">
-            <div className="text-[10px] text-neutral-400 font-serif">综合命势</div>
+            <div className="text-[10px] text-neutral-400 font-serif">综合支持度</div>
             <div className="text-xl font-mono font-extrabold text-amber-300">{scores.overall}</div>
           </div>
           <div className="p-2 rounded-xl bg-neutral-900/80 border border-yellow-500/20">
@@ -100,6 +144,59 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
           </div>
         </div>
       </div>
+
+      {/* ========================================================= */}
+      {/* V3 对你的影响 (Personal Relevance & Modification Banner) */}
+      {/* ========================================================= */}
+      {personalMod && (
+        <div className="w-full glass-panel rounded-2xl p-4 border border-amber-500/40 bg-gradient-to-r from-amber-950/30 via-neutral-900 to-neutral-950 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <UserCheck className="w-4 h-4 text-amber-400" />
+              <h4 className="text-xs font-serif font-bold text-amber-200">
+                对你的个人影响 · {personalMod.elementAdjustmentTitle}
+              </h4>
+            </div>
+
+            <button
+              onClick={() => setIsPersonalExplainOpen(true)}
+              className="text-[10px] text-amber-300 hover:text-white flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/30 transition-colors"
+            >
+              <span>关联度 {personalMod.personalRelevance}%</span>
+              <HelpCircle className="w-3 h-3" />
+            </button>
+          </div>
+
+          <p className="text-xs text-neutral-300 font-serif leading-relaxed">
+            {personalMod.elementAdjustmentMessage}
+          </p>
+
+          {/* Repeated Archetype Alert if triggered */}
+          {personalMod.repeatedArchetypeAlert && (
+            <div className="p-2.5 rounded-xl bg-amber-950/40 border border-amber-500/30 text-xs font-serif text-amber-200">
+              <span className="font-bold block mb-0.5">
+                高频神谕原型 · {personalMod.repeatedArchetypeAlert.cardName} ({personalMod.repeatedArchetypeAlert.archetype}) × {personalMod.repeatedArchetypeAlert.count}
+              </span>
+              <span className="text-[11px] text-neutral-300">
+                {personalMod.repeatedArchetypeAlert.insight}
+              </span>
+            </div>
+          )}
+
+          {/* Compare Previous Reading in same domain */}
+          {personalMod.trendComparison && (
+            <div className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-xs font-serif space-y-1">
+              <div className="flex items-center gap-1 text-emerald-400 font-bold text-[11px]">
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>与上次同类问卦相比：{personalMod.trendComparison.trendEvaluation === 'improving' ? '趋势显著改善' : '稳步调整中'}</span>
+              </div>
+              <p className="text-[11px] text-neutral-300">
+                {personalMod.trendComparison.trendMessage}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ========================================================= */}
       {/* 02. 本次牌势 (Momentum Animated 3-Node Sequence) */}
@@ -176,11 +273,9 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
                 className="p-3 rounded-xl bg-gradient-to-r from-amber-950/30 via-neutral-900 to-neutral-950 border border-amber-500/20 space-y-1.5"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-serif font-bold text-amber-300">
-                      {combo.cardNames.join(' + ')}
-                    </span>
-                  </div>
+                  <span className="text-xs font-serif font-bold text-amber-300">
+                    {combo.cardNames.join(' + ')}
+                  </span>
                   <span className="text-[10px] text-amber-400 font-serif font-bold">
                     ★★★★★ {combo.title}
                   </span>
@@ -195,7 +290,7 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
       )}
 
       {/* ========================================================= */}
-      {/* 05. 专题领域洞察 (Domain Narrative: Love / Career / Wealth) */}
+      {/* 05. 专题领域洞察 (Domain Narrative) */}
       {/* ========================================================= */}
       <div className="w-full glass-panel rounded-2xl p-4 border border-neutral-800 space-y-2">
         <button
@@ -215,7 +310,6 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
               {narrative.domainNarrative}
             </p>
 
-            {/* Sub-scores radar bars */}
             <div className="grid grid-cols-2 gap-2 pt-1">
               <div className="p-2 rounded-xl bg-neutral-900/60 border border-neutral-800 flex items-center justify-between text-xs font-serif">
                 <span className="text-neutral-400">财富机遇</span>
@@ -239,7 +333,7 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
       </div>
 
       {/* ========================================================= */}
-      {/* 06. 五行流转与阴阳平衡 (Elements & YinYang Engine) */}
+      {/* 06. 五行流转与阴阳平衡 */}
       {/* ========================================================= */}
       <div className="w-full glass-panel rounded-2xl p-4 border border-neutral-800 space-y-3">
         <button
@@ -257,7 +351,6 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
 
         {showElementsAccordion && (
           <div className="space-y-3 pt-1 animate-fade-in">
-            {/* Elements Percentage Bar */}
             <div className="w-full h-2.5 rounded-full bg-neutral-900 overflow-hidden flex border border-neutral-800">
               <div style={{ width: `${elements.percentages.wood}%` }} className="h-full bg-emerald-500" title="木" />
               <div style={{ width: `${elements.percentages.fire}%` }} className="h-full bg-rose-500" title="火" />
@@ -274,13 +367,11 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
               <span>水 {elements.percentages.water}%</span>
             </div>
 
-            {/* Yin Yang Ratio */}
             <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800 flex items-center justify-between text-xs font-serif">
               <span className="text-neutral-400">阴阳态势</span>
-              <span className="text-amber-200 font-bold">{yinYang.stateLabel} (阳 {yinYang.yangPercent}% : 阴 {yinYang.yinPercent}%)</span>
+              <span className="text-amber-200 font-bold">{yinYang.stateLabel}</span>
             </div>
 
-            {/* Practical Advice (宜 / 避免) */}
             <div className="grid grid-cols-2 gap-2 text-xs font-serif">
               <div className="p-2.5 rounded-xl bg-emerald-950/30 border border-emerald-500/20 space-y-1">
                 <span className="text-emerald-400 font-bold block">宜 · 顺势而行</span>
@@ -305,7 +396,7 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
       </div>
 
       {/* ========================================================= */}
-      {/* 07. 关键时间窗口 (Timing Windows) */}
+      {/* 07. 关键时间窗口 */}
       {/* ========================================================= */}
       <div className="w-full glass-panel rounded-2xl p-4 border border-neutral-800 space-y-2.5">
         <div className="flex items-center justify-between">
@@ -324,7 +415,7 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
       </div>
 
       {/* ========================================================= */}
-      {/* 08. 行动建议与注意事项 (Actions & Cautions) */}
+      {/* 08. 行动建议与注意事项 */}
       {/* ========================================================= */}
       <div className="w-full glass-panel rounded-2xl p-4 border border-neutral-800 space-y-3">
         <h4 className="text-xs font-serif font-bold text-neutral-300 flex items-center gap-1.5">
@@ -350,6 +441,15 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
           </div>
           <p className="text-[11px] text-neutral-300">{narrative.cautions[0]}</p>
         </div>
+
+        {/* 今日一句 Closing Quote */}
+        {personalMod?.closingOraclePhrase && (
+          <div className="p-3 rounded-xl bg-gradient-to-r from-amber-950/30 to-neutral-900 border border-amber-500/30 text-center">
+            <span className="text-[11px] text-amber-300 font-serif italic">
+              “{personalMod.closingOraclePhrase}”
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ========================================================= */}
@@ -361,9 +461,13 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>继续追问天机 · 澄清深意</span>
           </h4>
-          <span className="text-[10px] text-neutral-400 font-serif">
-            深入推演细节
-          </span>
+          <button
+            onClick={() => setIsPaywallOpen(true)}
+            className="text-[10px] text-amber-400/90 hover:text-amber-300 flex items-center gap-1 font-serif"
+          >
+            <Crown className="w-3 h-3" />
+            <span>特权充能</span>
+          </button>
         </div>
 
         <p className="text-xs text-neutral-300 font-serif">
@@ -411,7 +515,7 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
         <div className="w-full p-4 rounded-2xl bg-black border border-emerald-500/40 text-emerald-400 font-mono text-[11px] space-y-2 overflow-x-auto">
           <div className="flex items-center gap-1 text-xs font-bold text-emerald-300">
             <Code className="w-4 h-4" />
-            <span>Intelligence V2 Engine Debug Info</span>
+            <span>TIANJI 52 V3 Engine Diagnostic Debug</span>
           </div>
           <pre className="text-[10px] leading-relaxed text-emerald-300/80">
             {JSON.stringify(
@@ -422,6 +526,7 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
                 elementsDominant: reading.elementsAnalysis.dominantLabel,
                 timingWindow: reading.timingAnalysis.primaryWindow,
                 scores: reading.scoreAnalysis,
+                personalModification: reading.personalModification,
               },
               null,
               2
@@ -430,9 +535,7 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
         </div>
       )}
 
-      {/* ========================================================= */}
-      {/* Explain Why Modal (为什么这样解读？) */}
-      {/* ========================================================= */}
+      {/* Explain Why Modal */}
       <AnimatePresence>
         {isExplainModalOpen && (
           <div className="fixed inset-0 z-50 flex items-end justify-center pointer-events-auto">
@@ -485,13 +588,6 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
                     </div>
                   </div>
                 )}
-
-                <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 space-y-1.5">
-                  <span className="text-amber-400 font-bold block">五行生克判定</span>
-                  <p className="text-[11px] text-neutral-300 leading-relaxed">
-                    {elements.relationshipDesc} 主导元素为【{elements.dominantName}】，决定了当下以“{elements.advice.favorable[0]}”为优先策略。
-                  </p>
-                </div>
               </div>
 
               <button
@@ -504,6 +600,73 @@ export const ReadingSummary: React.FC<ReadingSummaryProps> = ({ reading, onSelec
           </div>
         )}
       </AnimatePresence>
+
+      {/* Personal Relevance Explain Modal (为什么与我相关？) */}
+      <AnimatePresence>
+        {isPersonalExplainOpen && personalMod && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center pointer-events-auto">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsPersonalExplainOpen(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            />
+
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              className="relative z-10 w-full max-w-[440px] max-h-[80vh] bg-[#0c0e15] border-t border-amber-500/30 rounded-t-3xl shadow-2xl p-5 overflow-y-auto space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <UserCheck className="w-4 h-4 text-amber-400" />
+                  <h3 className="text-sm font-serif font-bold text-amber-200">
+                    天机档案 · 为什么与我深度相关？
+                  </h3>
+                </div>
+                <button onClick={() => setIsPersonalExplainOpen(false)} className="p-1 text-neutral-400 hover:text-white">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs font-serif text-neutral-300">
+                <p className="text-neutral-400 leading-relaxed">
+                  系统将本次神谕与你的<span className="text-amber-300 font-bold">【出生年份五行 + 近30天占验轨迹 + 当前问卦领域】</span>进行了深度矩阵拟合：
+                </p>
+
+                {personalMod.explainReasons.map((reason, idx) => (
+                  <div key={idx} className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 space-y-1">
+                    <span className="text-amber-400 font-bold block">{reason.title}</span>
+                    <p className="text-[11px] text-neutral-300 leading-relaxed">{reason.detail}</p>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setIsPersonalExplainOpen(false)}
+                className="w-full py-3 rounded-xl bg-amber-500 text-black font-serif font-bold text-xs hover:bg-amber-400 transition-colors"
+              >
+                已悉知个人关联
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Share Card Modal */}
+      <ShareCardModal
+        isOpen={isShareModalOpen}
+        reading={reading}
+        onClose={() => setIsShareModalOpen(false)}
+      />
+
+      {/* Paywall Modal */}
+      <PaywallModal
+        isOpen={isPaywallOpen}
+        onClose={() => setIsPaywallOpen(false)}
+      />
     </div>
   );
 };

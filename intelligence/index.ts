@@ -7,8 +7,12 @@ import { analyzeYinYang, YinYangAnalysisResult } from './yinYangEngine';
 import { analyzeMomentum, MomentumAnalysisResult } from './momentumEngine';
 import { analyzeTiming, TimingAnalysisResult } from './timingEngine';
 import { calculateScores, ScoreAnalysisResult } from './scoreEngine';
-import { buildNarrative, NarrativeResult } from './narrativeBuilder';
+import { buildNarrative, NarrativeResult, NarrativeMode } from './narrativeBuilder';
 import { generateFollowUps, FollowUpOption } from './followUpEngine';
+import { calculateZodiacFromYear } from '@/personal/zodiacEngine';
+import { calculatePersonalElementProfile, PersonalElementProfile } from '@/personal/personalElementEngine';
+import { applyPersonalModifier, PersonalModificationResult } from '@/personal/personalModifier';
+import { BirthProfile } from '@/personal/birthProfile';
 
 export interface IntelligenceReadingResult extends ReadingAnalysis {
   // Enhanced Intelligence V2 Fields
@@ -22,6 +26,11 @@ export interface IntelligenceReadingResult extends ReadingAnalysis {
   scoreAnalysis: ScoreAnalysisResult;
   narrativeAnalysis: NarrativeResult;
   followUpOptions: FollowUpOption[];
+
+  // V3 Personal Destiny Additions
+  personalElementProfile: PersonalElementProfile;
+  personalModification: PersonalModificationResult;
+  isPrivate?: boolean;
 }
 
 export function runIntelligenceEngine(
@@ -30,7 +39,11 @@ export function runIntelligenceEngine(
   category: QuestionCategory = 'general',
   spreadType: SpreadType = 'three',
   isClarifier = false,
-  parentReadingId?: string
+  parentReadingId?: string,
+  history: ReadingAnalysis[] = [],
+  birthProfile?: BirthProfile,
+  isPrivate = false,
+  activeNarrativeMode: NarrativeMode = 'standard'
 ): IntelligenceReadingResult {
   // Step 1: Classify Question
   const questionClassified = classifyQuestion(question, category);
@@ -71,7 +84,7 @@ export function runIntelligenceEngine(
     momentumAnalysis.type
   );
 
-  // Step 9: Narrative Builder (Grounded Eastern Wisdom Text)
+  // Step 9: Narrative Builder (Supporting 5 modes)
   const narrativeAnalysis = buildNarrative(
     cards,
     questionClassified,
@@ -80,7 +93,8 @@ export function runIntelligenceEngine(
     yinYangAnalysis,
     combinationsAnalysis,
     timingAnalysis,
-    scoreAnalysis
+    scoreAnalysis,
+    activeNarrativeMode
   );
 
   // Step 10: Follow-up Engine
@@ -91,7 +105,63 @@ export function runIntelligenceEngine(
     cards
   );
 
-  // Backward Compatible Mapping to ReadingAnalysis
+  // Step 11: V3 Personal Modifier Layer
+  const birthYear = birthProfile?.birthDate ? parseInt(birthProfile.birthDate.split('-')[0], 10) : 1996;
+  const zodiac = calculateZodiacFromYear(birthYear);
+  const personalElementProfile = calculatePersonalElementProfile(zodiac, history);
+
+  const rawResultPlaceholder = {
+    id: readingContext.readingId,
+    date: new Date().toLocaleDateString('zh-CN'),
+    timestamp: Date.now(),
+    question: isPrivate ? '🔒 私密问卦' : question,
+    category,
+    spreadType,
+    cards: cards.map((c, i) => ({ positionId: `pos_${i}`, cardId: c.id })),
+    overallScore: scoreAnalysis.overall,
+    wealthScore: scoreAnalysis.wealth,
+    careerScore: scoreAnalysis.career,
+    loveScore: scoreAnalysis.love,
+    noblemanScore: scoreAnalysis.noble,
+    oracleQuote: narrativeAnalysis.coreTheme.summaryQuote,
+    elementTrend: {
+      sequence: cards.map((c) => c.elementName),
+      interaction: elementsAnalysis.relationship === '五行相生' ? 'generate' : elementsAnalysis.relationship === '能量淬炼' ? 'restrain' : 'harmonious',
+      description: elementsAnalysis.relationshipDesc,
+    },
+    dominantElement: elementsAnalysis.dominant,
+    actionAdvices: narrativeAnalysis.actions,
+    timeline: {
+      near: timingAnalysis.primaryWindow + '：' + timingAnalysis.timingDesc,
+      mid: timingAnalysis.secondaryWindow + '：局势逐步清晰明朗。',
+      far: '未来3-6个月：长远格局稳固成型。',
+    },
+    luckyElements: {
+      color: '玄黑水墨 · 苍青蓝',
+      direction: '正北 · 玄冥智水',
+      time: '21:00 - 23:00',
+      element: elementsAnalysis.dominantName,
+      number: 8,
+    },
+    questionClassified,
+    readingContext,
+    momentumAnalysis,
+    elementsAnalysis,
+    yinYangAnalysis,
+    combinationsAnalysis,
+    timingAnalysis,
+    scoreAnalysis,
+    narrativeAnalysis,
+    followUpOptions,
+  } as IntelligenceReadingResult;
+
+  const personalModification = applyPersonalModifier(
+    rawResultPlaceholder,
+    personalElementProfile,
+    history,
+    birthProfile
+  );
+
   const readingId = readingContext.readingId;
   const dateStr = new Date().toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', weekday: 'short' });
 
@@ -99,7 +169,7 @@ export function runIntelligenceEngine(
     id: readingId,
     date: dateStr,
     timestamp: Date.now(),
-    question: question || '今日神谕·乾坤运势',
+    question: isPrivate ? '🔒 私密问卦' : (question || '今日神谕·乾坤运势'),
     category,
     spreadType,
     cards: cards.map((c, i) => ({
@@ -119,9 +189,9 @@ export function runIntelligenceEngine(
     },
     dominantElement: elementsAnalysis.dominant,
     actionAdvices: [
-      narrativeAnalysis.actions[0] || '保持从容笃定。',
-      narrativeAnalysis.actions[1] || '主动与良师沟通。',
-      narrativeAnalysis.actions[2] || '凡事留三分余地。',
+      narrativeAnalysis.actions[0] || '保持内心笃定，理清核心诉求。',
+      narrativeAnalysis.actions[1] || '主动与关键良师益友保持沟通。',
+      narrativeAnalysis.actions[2] || '凡事留三分余地，顺势而为。',
     ],
     timeline: {
       near: timingAnalysis.primaryWindow + '：' + timingAnalysis.timingDesc,
@@ -147,6 +217,11 @@ export function runIntelligenceEngine(
     scoreAnalysis,
     narrativeAnalysis,
     followUpOptions,
+
+    // V3 Personal Layer
+    personalElementProfile,
+    personalModification,
+    isPrivate,
   };
 }
 

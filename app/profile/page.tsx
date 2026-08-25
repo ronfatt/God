@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { TopHeader } from '@/components/Layout/TopHeader';
 import { UserProfile } from '@/types/oracle';
 import { Storage, DEFAULT_USER } from '@/lib/storage';
 import { sound } from '@/lib/sound';
 import { generateHistoryInsights, HistoryInsightsResult } from '@/intelligence';
+import { PaywallModal } from '@/components/Premium/PaywallModal';
 import {
   User,
   Coins,
@@ -21,12 +23,20 @@ import {
   AlertCircle,
   Clock,
   Compass,
+  Crown,
+  ArrowRight,
+  Trash2,
+  RefreshCw,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [user, setUser] = useState<UserProfile>(DEFAULT_USER);
   const [insights, setInsights] = useState<HistoryInsightsResult | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [birthPlace, setBirthPlace] = useState('');
@@ -58,22 +68,32 @@ export default function ProfilePage() {
     };
     setUser(updated);
     Storage.saveUser(updated);
+    Storage.saveBirthProfile({
+      nickname: nameInput,
+      birthDate,
+      birthPlace,
+      gender: gender as any,
+    });
     setIsEditing(false);
   };
 
   const handleAddTokens = () => {
     sound.playBassHit();
-    const updated: UserProfile = {
-      ...user,
-      tokens: (user.tokens || 0) + 50,
-    };
-    setUser(updated);
-    Storage.saveUser(updated);
+    Storage.addTokens(50, '每日免费补给');
+    setUser(Storage.getUser());
   };
 
   const handleToggleSound = () => {
     const nextMute = sound.toggleMute();
     setIsMuted(nextMute);
+  };
+
+  const handleResetData = () => {
+    sound.playBassHit();
+    Storage.resetAllData();
+    setShowResetConfirm(false);
+    setUser(DEFAULT_USER);
+    window.location.reload();
   };
 
   const elementStats = [
@@ -204,9 +224,32 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ========================================================= */}
-      {/* 个人近期命势总览 (Personal Oracle Profile from Spec) */}
-      {/* ========================================================= */}
+      {/* V3 Destiny Dashboard Fast Entry Banner */}
+      <div
+        onClick={() => {
+          sound.playCardSelect();
+          router.push('/profile/destiny');
+        }}
+        className="w-full glass-panel rounded-2xl p-4 border border-amber-500/40 bg-gradient-to-r from-amber-950/30 via-neutral-900 to-neutral-950 flex items-center justify-between cursor-pointer hover:border-amber-400 transition-all group"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-amber-950/60 border border-amber-500/30 text-amber-400 group-hover:scale-105 transition-transform">
+            <Compass className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-xs font-serif font-bold text-amber-200">
+              天机档案 · 长期命势总揽
+            </h3>
+            <p className="text-[10px] text-neutral-400 font-serif">
+              7D / 30D / 90D 周期切换 · 五张核心神谕
+            </p>
+          </div>
+        </div>
+
+        <ArrowRight className="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform" />
+      </div>
+
+      {/* 个人近期命势总览 */}
       <div className="w-full glass-panel rounded-2xl p-4 border border-amber-500/30 space-y-3">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-serif font-bold text-amber-200 flex items-center gap-1.5">
@@ -242,7 +285,7 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      {/* Repeated Card Alert if present */}
+      {/* Repeated Card Alert */}
       {insights?.repeatedCardAlert && (
         <div className="w-full p-3 rounded-2xl bg-amber-950/40 border border-amber-500/40 flex items-start gap-2.5 text-xs font-serif">
           <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
@@ -288,7 +331,30 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Token Fast Top-up Demo */}
+      {/* Premium Membership Banner */}
+      <div className="w-full glass-panel rounded-2xl p-4 border border-amber-500/30 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-amber-950/60 text-amber-400 border border-amber-500/30">
+            <Crown className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="text-xs font-serif font-bold text-neutral-200">尊享天机会员</div>
+            <div className="text-[10px] text-neutral-400">解锁九宫大阵 · AI 深度演卦</div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => {
+            sound.playCardSelect();
+            setIsPaywallOpen(true);
+          }}
+          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-serif font-bold text-xs shadow-md active:scale-95 transition-all"
+        >
+          查看特权
+        </button>
+      </div>
+
+      {/* Token Top-up Demo */}
       <div className="w-full glass-panel rounded-2xl p-4 border border-amber-500/20 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-amber-950/60 text-amber-400 border border-amber-500/30">
@@ -302,55 +368,15 @@ export default function ProfilePage() {
 
         <button
           onClick={handleAddTokens}
-          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-serif font-bold text-xs shadow-md active:scale-95 transition-all"
+          className="px-3.5 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-amber-300 font-serif font-bold text-xs active:scale-95 transition-all"
         >
           领取 +50 令
         </button>
       </div>
 
-      {/* 30-Day Elemental Distribution Chart */}
-      <div className="w-full glass-panel rounded-2xl p-4 border border-neutral-800 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-[10px] text-neutral-400 font-serif block">近期能量倾向</span>
-            <h3 className="text-sm font-serif font-bold text-neutral-200">
-              你的近期主元素：<span className="text-cyan-300">水 (38%)</span>
-            </h3>
-          </div>
-          <span className="text-[10px] text-amber-400/80 font-serif bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-500/30">
-            近 30 天统计
-          </span>
-        </div>
-
-        {/* Stacked element bar */}
-        <div className="w-full h-3 rounded-full bg-neutral-900 overflow-hidden flex border border-neutral-800">
-          {elementStats.map((el, i) => (
-            <div
-              key={i}
-              style={{ width: `${el.percent}%`, backgroundColor: el.color }}
-              className="h-full"
-              title={`${el.name}: ${el.percent}%`}
-            />
-          ))}
-        </div>
-
-        {/* Detail Legend list */}
-        <div className="space-y-1.5 pt-1">
-          {elementStats.map((el, i) => (
-            <div key={i} className="flex items-center justify-between text-xs font-serif">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: el.color }} />
-                <span className="text-neutral-300">{el.name} · {el.label}</span>
-              </div>
-              <span className="font-mono text-neutral-400">{el.percent}%</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Settings & Sound */}
       <div className="w-full glass-panel rounded-2xl p-4 border border-neutral-800 space-y-2.5">
-        <h4 className="text-xs font-serif font-bold text-neutral-300">系统偏好</h4>
+        <h4 className="text-xs font-serif font-bold text-neutral-300">系统偏好与资料管理</h4>
 
         <div className="flex items-center justify-between py-1 text-xs font-serif">
           <div className="flex items-center gap-2 text-neutral-300">
@@ -370,9 +396,20 @@ export default function ProfilePage() {
             />
           </button>
         </div>
+
+        {/* Data Reset Button */}
+        <div className="pt-2 border-t border-neutral-800 flex items-center justify-between">
+          <span className="text-xs text-neutral-400 font-serif">重置我的天机档案</span>
+          <button
+            onClick={() => setShowResetConfirm(true)}
+            className="px-3 py-1 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs font-serif hover:bg-rose-900/60 transition-colors"
+          >
+            重置资料
+          </button>
+        </div>
       </div>
 
-      {/* Disclaimer (Profile > About) */}
+      {/* Disclaimer */}
       <div className="w-full p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 space-y-2">
         <div className="flex items-center gap-1.5 text-xs text-neutral-400 font-serif font-bold">
           <Shield className="w-3.5 h-3.5 text-amber-400/80" />
@@ -382,6 +419,57 @@ export default function ProfilePage() {
           天机52以东方文化、象征系统及娱乐互动为基础，所有内容仅供个人反思、娱乐及文化体验，不构成医疗、法律、投资或其他专业建议。
         </p>
       </div>
+
+      {/* Paywall Modal */}
+      <PaywallModal
+        isOpen={isPaywallOpen}
+        onClose={() => setIsPaywallOpen(false)}
+      />
+
+      {/* Reset Confirmation Modal */}
+      <AnimatePresence>
+        {showResetConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowResetConfirm(false)}
+              className="absolute inset-0 bg-black/85 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative z-10 w-full max-w-[340px] bg-neutral-950 border border-rose-500/40 rounded-3xl p-5 shadow-2xl space-y-3 text-center"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-rose-950/60 border border-rose-500/40 text-rose-400 mx-auto flex items-center justify-center">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-sm font-serif font-bold text-rose-200">
+                确定重置天机档案？
+              </h3>
+              <p className="text-xs text-neutral-300 font-serif leading-relaxed">
+                此操作将清空本地所有占验记录与档案数据，无法撤销。
+              </p>
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  className="py-2.5 rounded-xl bg-neutral-800 text-neutral-300 font-serif text-xs"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleResetData}
+                  className="py-2.5 rounded-xl bg-rose-600 text-white font-serif font-bold text-xs"
+                >
+                  确认重置
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

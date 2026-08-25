@@ -1,0 +1,21 @@
+{
+  "name": "天机52 · 东方神谕",
+  "short_name": "天机52",
+  "description": "东方玄学 × 高级游戏UI × 神秘电影感 Mobile Web App",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07080c",
+  "theme_color": "#D4AF37",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
