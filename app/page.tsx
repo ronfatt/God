@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { TopHeader } from '@/components/Layout/TopHeader';
 import { DailyOneCard } from '@/components/Oracle/DailyOneCard';
 import { OnboardingModal } from '@/components/Personal/OnboardingModal';
@@ -14,20 +15,20 @@ import {
   Layers,
   Flame,
   Compass,
-  UserCheck,
-  CheckCircle2,
-  AlertCircle,
+  Map,
   Clock,
   Coins,
+  Shield,
+  Info,
 } from 'lucide-react';
 
 export default function HomePage() {
+  const router = useRouter();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [dailyData, setDailyData] = useState<DailyOracleResult | null>(null);
   const [user, setUser] = useState(Storage.getUser());
 
   useEffect(() => {
-    // Check onboarding
     if (!Storage.isOnboardingCompleted()) {
       setShowOnboarding(true);
     }
@@ -41,7 +42,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col px-4 pt-1 pb-6 space-y-4">
+    <div className="flex-1 flex flex-col px-4 pt-1 pb-8 space-y-4 select-none">
       {/* Top Navigation & Status */}
       <TopHeader />
 
@@ -60,7 +61,7 @@ export default function HomePage() {
         </p>
 
         <p className="text-xs font-serif text-neutral-300 mt-2 px-6 italic">
-          “每一次抽牌，都是一个点。当点连接成线，你会看见自己的轨迹。”
+          “抽到的是牌，留下的是轨迹。真正值得看的，是你正在形成的模式。”
         </p>
       </section>
 
@@ -167,12 +168,70 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 04. Daily 3D One Card */}
+      {/* 04. 你的30日轨迹 (Oracle Journey Preview) */}
+      <section
+        onClick={() => {
+          sound.playCardSelect();
+          router.push('/journey');
+        }}
+        className="w-full glass-panel rounded-2xl p-3.5 border border-amber-500/30 bg-gradient-to-r from-amber-950/20 via-neutral-900 to-neutral-950 flex items-center justify-between cursor-pointer hover:border-amber-400/60 transition-all group"
+      >
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-amber-950/60 border border-amber-500/30 text-amber-400 group-hover:scale-105 transition-transform">
+            <Clock className="w-4 h-4" />
+          </div>
+          <div>
+            <h4 className="text-xs font-serif font-bold text-amber-200">
+              你的 30 日生命轨迹
+            </h4>
+            <span className="text-[10px] text-neutral-400 font-serif">
+              清算旧局 ➔ 低谷回升 ➔ 乘势进取
+            </span>
+          </div>
+        </div>
+
+        <span className="text-xs text-amber-400 font-serif flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+          <span>查看轨迹</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </span>
+      </section>
+
+      {/* 05. 90-Day Destiny Map Banner */}
+      <section
+        onClick={() => {
+          sound.playCardSelect();
+          router.push('/destiny-map/90');
+        }}
+        className="w-full glass-panel rounded-2xl p-4 border border-amber-500/40 bg-gradient-to-r from-amber-950/40 via-neutral-900 to-neutral-950 flex items-center justify-between cursor-pointer hover:border-amber-400 transition-all group shadow-lg"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-amber-950/80 border border-amber-500/40 text-amber-300 group-hover:scale-105 transition-transform">
+            <Map className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-xs font-serif font-bold text-amber-200">
+                九十日全维天机图
+              </h3>
+              <span className="px-1.5 py-0.2 rounded bg-amber-500 text-black text-[9px] font-mono font-bold">
+                PRO
+              </span>
+            </div>
+            <p className="text-[10px] text-neutral-400 font-serif mt-0.5">
+              看见接下来三个阶段的事业、财富与内在走势
+            </p>
+          </div>
+        </div>
+
+        <ArrowRight className="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform" />
+      </section>
+
+      {/* 06. Daily 3D One Card */}
       <section>
         <DailyOneCard />
       </section>
 
-      {/* 05. Quick Access Portals */}
+      {/* 07. Quick Access Portals */}
       <section className="grid grid-cols-2 gap-3 pt-1">
         <Link
           href="/cards"
@@ -189,16 +248,16 @@ export default function HomePage() {
         </Link>
 
         <Link
-          href="/history"
+          href="/about"
           onClick={() => sound.playCardSelect()}
           className="glass-panel p-3.5 rounded-2xl border border-neutral-800 hover:border-amber-500/40 flex items-center gap-3 transition-all group"
         >
           <div className="p-2.5 rounded-xl bg-rose-950/40 text-rose-400 border border-rose-500/20 group-hover:scale-105 transition-transform">
-            <Flame className="w-4 h-4" />
+            <Info className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-xs font-serif font-bold text-neutral-200">天机记录</div>
-            <div className="text-[10px] text-neutral-400 font-sans">🔥 7 天连续占验</div>
+            <div className="text-xs font-serif font-bold text-neutral-200">关于天机</div>
+            <div className="text-[10px] text-neutral-400 font-sans">世界观与方案</div>
           </div>
         </Link>
       </section>

@@ -6,12 +6,14 @@ import { TopHeader } from '@/components/Layout/TopHeader';
 import { OracleCardData, SpreadType, QuestionCategory, CardDrawResult } from '@/types/oracle';
 import { SPREAD_CONFIGS } from '@/data/cards';
 import { ShuffleAnimation } from '@/components/Oracle/ShuffleAnimation';
+import { CutDeckAnimation } from '@/components/Oracle/CutDeckAnimation';
 import { CardDeck } from '@/components/Oracle/CardDeck';
 import { ThreeCardSpread } from '@/components/Oracle/ThreeCardSpread';
 import { SixCardSpread } from '@/components/Oracle/SixCardSpread';
 import { NineCardSpread } from '@/components/Oracle/NineCardSpread';
 import { ReadingSummary } from '@/components/Oracle/ReadingSummary';
 import { CardDetailModal } from '@/components/Oracle/CardDetailModal';
+import { CombinationResonanceBanner } from '@/components/Oracle/CombinationResonanceBanner';
 import { analyzeCards } from '@/lib/readingEngine';
 import { IntelligenceReadingResult } from '@/intelligence';
 import { Storage } from '@/lib/storage';
@@ -33,14 +35,19 @@ function DrawContent() {
 
   const spreadConfig = SPREAD_CONFIGS.find((s) => s.type === spreadType) || SPREAD_CONFIGS[0];
 
-  // Flow State: 'shuffle' -> 'deck' -> 'reveal' -> 'result'
-  const [phase, setPhase] = useState<'shuffle' | 'deck' | 'reveal' | 'result'>('shuffle');
+  // Flow State: 'shuffle' -> 'cut' -> 'deck' -> 'reveal' -> 'result'
+  const [phase, setPhase] = useState<'shuffle' | 'cut' | 'deck' | 'reveal' | 'result'>('shuffle');
   const [drawnCards, setDrawnCards] = useState<CardDrawResult[]>([]);
   const [readingResult, setReadingResult] = useState<IntelligenceReadingResult | null>(null);
   const [modalCard, setModalCard] = useState<OracleCardData | null>(null);
 
-  // Once shuffle is done
+  // Once shuffle is done -> go to Cut Deck
   const handleShuffleComplete = () => {
+    setPhase('cut');
+  };
+
+  // Once cut is done -> go to Deck Draw
+  const handleCutComplete = (cutIndex: number) => {
     setPhase('deck');
   };
 
@@ -69,6 +76,8 @@ function DrawContent() {
     const allRevealed = updated.every((c) => c.isRevealed);
     if (allRevealed) {
       const cardsOnly = updated.map((c) => c.card);
+      const history = Storage.getHistory();
+      const birthProfile = Storage.getBirthProfile();
       const analysis = analyzeCards(cardsOnly, question, category, spreadType, isClarifier, parentReadingId);
       setReadingResult(analysis);
       Storage.saveReading(analysis);
@@ -76,7 +85,7 @@ function DrawContent() {
       setTimeout(() => {
         try {
           confetti({
-            particleCount: 70,
+            particleCount: 80,
             spread: 90,
             origin: { y: 0.6 },
             colors: ['#D4AF37', '#FDE68A', '#E11D48', '#10B981', '#A855F7'],
@@ -99,7 +108,7 @@ function DrawContent() {
 
     try {
       confetti({
-        particleCount: 80,
+        particleCount: 90,
         spread: 100,
         origin: { y: 0.5 },
         colors: ['#D4AF37', '#FDE68A', '#E11D48', '#10B981', '#A855F7'],
@@ -111,7 +120,7 @@ function DrawContent() {
   const handleFollowUpSelect = (followUpText: string, cardCount: 1 | 3) => {
     sound.playBassHit();
     const tokenCost = cardCount === 1 ? 10 : 20;
-    Storage.consumeTokens(tokenCost);
+    Storage.consumeTokens(tokenCost, '追问澄清消耗');
 
     setParentReadingId(readingResult?.id);
     setQuestion(followUpText);
@@ -146,9 +155,10 @@ function DrawContent() {
         </span>
         <span className="text-neutral-400 text-[11px]">
           {phase === 'shuffle' && '第一阶段 · 洗牌聚气'}
-          {phase === 'deck' && '第二阶段 · 直觉抽牌'}
-          {phase === 'reveal' && '第三阶段 · 翻牌显圣'}
-          {phase === 'result' && '第四阶段 · 天机尽释'}
+          {phase === 'cut' && '第二阶段 · 切牌定序'}
+          {phase === 'deck' && '第三阶段 · 直觉抽牌'}
+          {phase === 'reveal' && '第四阶段 · 翻牌显圣'}
+          {phase === 'result' && '第五阶段 · 天机尽释'}
         </span>
       </div>
 
@@ -168,7 +178,14 @@ function DrawContent() {
         </div>
       )}
 
-      {/* STEP 2: 52-CARD COVERFLOW DECK */}
+      {/* STEP 2: CUT DECK */}
+      {phase === 'cut' && (
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <CutDeckAnimation onCutComplete={handleCutComplete} />
+        </div>
+      )}
+
+      {/* STEP 3: 52-CARD COVERFLOW DECK */}
       {phase === 'deck' && (
         <div className="flex-1 flex flex-col items-center">
           <CardDeck
@@ -178,7 +195,7 @@ function DrawContent() {
         </div>
       )}
 
-      {/* STEP 3 & 4: SPREAD REVEAL & RESULT */}
+      {/* STEP 4 & 5: SPREAD REVEAL & RESULT */}
       {(phase === 'reveal' || phase === 'result') && (
         <div className="flex-1 flex flex-col items-center space-y-4 animate-fade-in">
           {/* Action Bar for Quick Reveal */}
@@ -224,6 +241,13 @@ function DrawContent() {
             )}
           </div>
 
+          {/* Major Combination Resonance Banner if triggered */}
+          {isAllRevealed && readingResult?.combinationsAnalysis?.[0] && (
+            <CombinationResonanceBanner
+              combination={readingResult.combinationsAnalysis[0]}
+            />
+          )}
+
           {/* If all cards are revealed, show Intelligence Reading Summary */}
           {isAllRevealed && readingResult && (
             <div className="w-full space-y-4 pt-3 border-t border-neutral-800 animate-fade-in">
@@ -237,12 +261,12 @@ function DrawContent() {
                 <button
                   onClick={() => {
                     sound.playCardSelect();
-                    router.push('/history');
+                    router.push('/journey');
                   }}
                   className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-serif font-bold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
                 >
                   <Sparkles className="w-4 h-4 fill-black" />
-                  <span>天机已载入历史档案 · 查看记录</span>
+                  <span>天机已载入生命轨迹 · 查看我的轨迹</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
