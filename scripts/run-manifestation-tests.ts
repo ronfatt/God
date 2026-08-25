@@ -34,7 +34,7 @@ console.log('✓ Test 2 Passed! Nezha Challenge Score:', t2Res.cardManifestation
 // Test 3: Transformation Pattern (Mengpo + Bodhi + Qinglong)
 console.log('Running Test 3: Transformation Pattern (Mengpo + Bodhi + Qinglong)...');
 const t3Cards = [getCard('S-3'), getCard('C-A'), getCard('C-2')];
-const t3Res = runIntelligenceEngine(t3Cards, '我要不要放弃旧项目开启新方向？', 'decision', 'three');
+const t3Res = runIntelligenceEngine(t3Cards, '我要不要放弃旧项目开启新方向？', 'custom', 'three');
 assert(t3Res.cardManifestations[0].manifestation === 'transformative', 'Mengpo must be transformative');
 assert(t3Res.overallManifestation.state === 'transformative_dominant', 'Overall state must be transformative_dominant');
 console.log('✓ Test 3 Passed! Mengpo Manifestation:', t3Res.cardManifestations[0].manifestation);

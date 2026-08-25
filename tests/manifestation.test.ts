@@ -44,7 +44,7 @@ describe('TIANJI 52 Manifestation Engine V5 Unit Tests', () => {
   // Test 3: Transformation Pattern (孟婆 S-3 + 菩提树 C-A + 青龙 C-2)
   test('Test 3: Ending to Beginning transition should detect Transformation pattern', () => {
     const cards = [getCard('S-3'), getCard('C-A'), getCard('C-2')];
-    const result = runIntelligenceEngine(cards, '我要不要放弃旧项目开启新方向？', 'decision', 'three');
+    const result = runIntelligenceEngine(cards, '我要不要放弃旧项目开启新方向？', 'custom', 'three');
 
     const mengpo = result.cardManifestations.find((c) => c.cardId === 'S-3');
     expect(mengpo?.manifestation).toBe('transformative');
