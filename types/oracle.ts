@@ -6,6 +6,8 @@ export type ArchetypeType = 'deity' | 'buddha' | 'bodhisattva' | 'immortal' | 'b
 
 export type SpreadType = 'three' | 'six' | 'nine';
 export type QuestionCategory = 'love' | 'wealth' | 'career' | 'relationship' | 'general' | 'custom';
+export type QuestionDomain = 'love' | 'career' | 'wealth' | 'relationship' | 'life' | 'decision';
+export type QuestionIntent = 'future' | 'decision' | 'outcome' | 'obstacle' | 'opportunity' | 'timing' | 'person' | 'advice';
 
 // 官方天机卡牌数据库模型
 export type TianjiCard = {

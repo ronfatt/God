@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { TopHeader } from '@/components/Layout/TopHeader';
-import { OracleCardData, SpreadType, QuestionCategory, CardDrawResult, ReadingAnalysis } from '@/types/oracle';
+import { OracleCardData, SpreadType, QuestionCategory, CardDrawResult } from '@/types/oracle';
 import { SPREAD_CONFIGS } from '@/data/cards';
 import { ShuffleAnimation } from '@/components/Oracle/ShuffleAnimation';
 import { CardDeck } from '@/components/Oracle/CardDeck';
@@ -13,24 +13,30 @@ import { NineCardSpread } from '@/components/Oracle/NineCardSpread';
 import { ReadingSummary } from '@/components/Oracle/ReadingSummary';
 import { CardDetailModal } from '@/components/Oracle/CardDetailModal';
 import { analyzeCards } from '@/lib/readingEngine';
+import { IntelligenceReadingResult } from '@/intelligence';
 import { Storage } from '@/lib/storage';
 import { sound } from '@/lib/sound';
-import { Sparkles, Eye, ArrowRight, RotateCcw, Share2, BookOpen } from 'lucide-react';
+import { Sparkles, Eye, ArrowRight, RotateCcw } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 function DrawContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const category = (searchParams.get('category') as QuestionCategory) || 'general';
-  const question = searchParams.get('q') || '今日神谕·乾坤运势';
-  const spreadType = (searchParams.get('spread') as SpreadType) || 'three';
+  const initialQuestion = searchParams.get('q') || '今日神谕·乾坤运势';
+  const initialSpreadType = (searchParams.get('spread') as SpreadType) || 'three';
+
+  const [question, setQuestion] = useState(initialQuestion);
+  const [spreadType, setSpreadType] = useState<SpreadType>(initialSpreadType);
+  const [isClarifier, setIsClarifier] = useState(false);
+  const [parentReadingId, setParentReadingId] = useState<string | undefined>(undefined);
 
   const spreadConfig = SPREAD_CONFIGS.find((s) => s.type === spreadType) || SPREAD_CONFIGS[0];
 
   // Flow State: 'shuffle' -> 'deck' -> 'reveal' -> 'result'
   const [phase, setPhase] = useState<'shuffle' | 'deck' | 'reveal' | 'result'>('shuffle');
   const [drawnCards, setDrawnCards] = useState<CardDrawResult[]>([]);
-  const [readingResult, setReadingResult] = useState<ReadingAnalysis | null>(null);
+  const [readingResult, setReadingResult] = useState<IntelligenceReadingResult | null>(null);
   const [modalCard, setModalCard] = useState<OracleCardData | null>(null);
 
   // Once shuffle is done
@@ -41,7 +47,12 @@ function DrawContent() {
   // Once user selects cards from 52-card deck
   const handleCardsSelected = (selected: OracleCardData[]) => {
     const formatted: CardDrawResult[] = selected.map((card, idx) => ({
-      position: spreadConfig.positions[idx],
+      position: spreadConfig.positions[idx] || {
+        id: `pos_${idx}`,
+        title: isClarifier ? `澄清位 · 0${idx + 1}` : `本位 · 0${idx + 1}`,
+        subtitle: 'Clarifier',
+        description: '追问澄清推演',
+      },
       card,
       isRevealed: false,
     }));
@@ -55,15 +66,13 @@ function DrawContent() {
     updated[index].isRevealed = true;
     setDrawnCards(updated);
 
-    // If all cards are revealed, calculate reading result
     const allRevealed = updated.every((c) => c.isRevealed);
     if (allRevealed) {
       const cardsOnly = updated.map((c) => c.card);
-      const analysis = analyzeCards(cardsOnly, question, category, spreadType);
+      const analysis = analyzeCards(cardsOnly, question, category, spreadType, isClarifier, parentReadingId);
       setReadingResult(analysis);
       Storage.saveReading(analysis);
 
-      // Celebration celestial burst
       setTimeout(() => {
         try {
           confetti({
@@ -84,7 +93,7 @@ function DrawContent() {
     setDrawnCards(updated);
 
     const cardsOnly = updated.map((c) => c.card);
-    const analysis = analyzeCards(cardsOnly, question, category, spreadType);
+    const analysis = analyzeCards(cardsOnly, question, category, spreadType, isClarifier, parentReadingId);
     setReadingResult(analysis);
     Storage.saveReading(analysis);
 
@@ -98,12 +107,28 @@ function DrawContent() {
     } catch {}
   };
 
+  // Handle Follow Up Clarifier trigger
+  const handleFollowUpSelect = (followUpText: string, cardCount: 1 | 3) => {
+    sound.playBassHit();
+    const tokenCost = cardCount === 1 ? 10 : 20;
+    Storage.consumeTokens(tokenCost);
+
+    setParentReadingId(readingResult?.id);
+    setQuestion(followUpText);
+    setIsClarifier(true);
+    setSpreadType(cardCount === 1 ? 'three' : 'three');
+    setDrawnCards([]);
+    setReadingResult(null);
+    setPhase('deck'); // Jump directly to intuitive deck draw for quick clarifier
+  };
+
   const isAllRevealed = drawnCards.length > 0 && drawnCards.every((c) => c.isRevealed);
+  const cardCountToDraw = isClarifier ? (spreadType === 'three' ? 3 : 1) : spreadConfig.cardCount;
 
   return (
     <div className="flex-1 flex flex-col px-4 pt-1 pb-8 space-y-4">
       <TopHeader
-        title={spreadConfig.title}
+        title={isClarifier ? '追问澄清神谕' : spreadConfig.title}
         showBack
         onBack={() => {
           if (phase === 'result') {
@@ -117,9 +142,9 @@ function DrawContent() {
       {/* Progress & Step Indicator */}
       <div className="w-full flex items-center justify-between px-2 pt-1 text-xs font-serif border-b border-neutral-800/80 pb-2">
         <span className="text-amber-400 font-bold truncate max-w-[200px]">
-          问：{question}
+          {isClarifier ? '追问：' : '问：'}{question}
         </span>
-        <span className="text-neutral-400">
+        <span className="text-neutral-400 text-[11px]">
           {phase === 'shuffle' && '第一阶段 · 洗牌聚气'}
           {phase === 'deck' && '第二阶段 · 直觉抽牌'}
           {phase === 'reveal' && '第三阶段 · 翻牌显圣'}
@@ -147,7 +172,7 @@ function DrawContent() {
       {phase === 'deck' && (
         <div className="flex-1 flex flex-col items-center">
           <CardDeck
-            requiredCount={spreadConfig.cardCount}
+            requiredCount={cardCountToDraw}
             onCardsSelected={handleCardsSelected}
           />
         </div>
@@ -199,10 +224,13 @@ function DrawContent() {
             )}
           </div>
 
-          {/* If all cards are revealed, show Reading Engine Analysis */}
+          {/* If all cards are revealed, show Intelligence Reading Summary */}
           {isAllRevealed && readingResult && (
             <div className="w-full space-y-4 pt-3 border-t border-neutral-800 animate-fade-in">
-              <ReadingSummary reading={readingResult} />
+              <ReadingSummary
+                reading={readingResult}
+                onSelectFollowUp={handleFollowUpSelect}
+              />
 
               {/* Bottom Actions */}
               <div className="pt-4 flex flex-col gap-2.5">

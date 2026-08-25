@@ -14,11 +14,14 @@ import { sound } from '@/lib/sound';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { analyzeCards } from '@/lib/readingEngine';
+import { IntelligenceReadingResult } from '@/intelligence';
+
 export default function HistoryPage() {
   const router = useRouter();
   const [history, setHistory] = useState<ReadingAnalysis[]>([]);
   const [user, setUser] = useState(Storage.getUser());
-  const [selectedReading, setSelectedReading] = useState<ReadingAnalysis | null>(null);
+  const [selectedReading, setSelectedReading] = useState<IntelligenceReadingResult | null>(null);
   const [modalCard, setModalCard] = useState<OracleCardData | null>(null);
 
   useEffect(() => {
@@ -29,7 +32,12 @@ export default function HistoryPage() {
 
   const handleOpenReading = (reading: ReadingAnalysis) => {
     sound.playCardSelect();
-    setSelectedReading(reading);
+    const cardDataList = reading.cards
+      .map((c) => ORACLE_CARDS.find((card) => card.id === c.cardId))
+      .filter((c): c is OracleCardData => !!c);
+
+    const rehydrated = analyzeCards(cardDataList, reading.question, reading.category, reading.spreadType);
+    setSelectedReading(rehydrated);
   };
 
   return (

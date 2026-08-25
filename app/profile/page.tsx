@@ -5,10 +5,27 @@ import { TopHeader } from '@/components/Layout/TopHeader';
 import { UserProfile } from '@/types/oracle';
 import { Storage, DEFAULT_USER } from '@/lib/storage';
 import { sound } from '@/lib/sound';
-import { User, Coins, Flame, Layers, Sparkles, Shield, Info, Edit3, Check, Volume2, VolumeX, RefreshCw } from 'lucide-react';
+import { generateHistoryInsights, HistoryInsightsResult } from '@/intelligence';
+import {
+  User,
+  Coins,
+  Flame,
+  Layers,
+  Sparkles,
+  Shield,
+  Edit3,
+  Check,
+  Volume2,
+  VolumeX,
+  TrendingUp,
+  AlertCircle,
+  Clock,
+  Compass,
+} from 'lucide-react';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<UserProfile>(DEFAULT_USER);
+  const [insights, setInsights] = useState<HistoryInsightsResult | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -18,12 +35,16 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const data = Storage.getUser();
+    const history = Storage.getHistory();
     setUser(data);
     setNameInput(data.name);
     setBirthDate(data.birthDate || '1996-08-18');
     setBirthPlace(data.birthPlace || '浙江 · 杭州');
     setGender(data.gender || '坤造 (女)');
     setIsMuted(sound.getMuted());
+
+    const insightData = generateHistoryInsights(history);
+    setInsights(insightData);
   }, []);
 
   const handleSaveProfile = () => {
@@ -56,11 +77,11 @@ export default function ProfilePage() {
   };
 
   const elementStats = [
-    { name: '水', percent: 38, color: '#06B6D4', label: '玄水智谋' },
-    { name: '金', percent: 26, color: '#EAB308', label: '刚毅决断' },
-    { name: '木', percent: 18, color: '#10B981', label: '生机成长' },
-    { name: '火', percent: 10, color: '#F43F5E', label: '热情显化' },
-    { name: '土', percent: 8, color: '#F59E0B', label: '厚重承载' },
+    { name: '水', percent: insights?.elementDistribution30Days.water ?? 38, color: '#06B6D4', label: '玄水智谋' },
+    { name: '金', percent: insights?.elementDistribution30Days.metal ?? 26, color: '#EAB308', label: '刚毅决断' },
+    { name: '木', percent: insights?.elementDistribution30Days.wood ?? 18, color: '#10B981', label: '生机成长' },
+    { name: '火', percent: insights?.elementDistribution30Days.fire ?? 10, color: '#F43F5E', label: '热情显化' },
+    { name: '土', percent: insights?.elementDistribution30Days.earth ?? 8, color: '#F59E0B', label: '厚重承载' },
   ];
 
   return (
@@ -180,6 +201,90 @@ export default function ProfilePage() {
               {user.collectedCardIds?.length || 17} / 52
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ========================================================= */}
+      {/* 个人近期命势总览 (Personal Oracle Profile from Spec) */}
+      {/* ========================================================= */}
+      <div className="w-full glass-panel rounded-2xl p-4 border border-amber-500/30 space-y-3">
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-serif font-bold text-amber-200 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>我的近期命势洞察</span>
+          </h4>
+          <span className="text-[10px] text-amber-400 font-serif">
+            {insights?.trendLabel || '气运稳步上扬'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 text-xs font-serif">
+          <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800">
+            <span className="text-neutral-400 block text-[10px]">主元素倾向</span>
+            <span className="text-cyan-300 font-bold text-sm">玄水 (38%)</span>
+          </div>
+          <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800">
+            <span className="text-neutral-400 block text-[10px]">核心主题</span>
+            <span className="text-amber-300 font-bold text-sm">关系整理 · 疗愈</span>
+          </div>
+          <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800">
+            <span className="text-neutral-400 block text-[10px]">主要动力</span>
+            <span className="text-emerald-300 font-bold text-sm">向内观察蓄势</span>
+          </div>
+          <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800">
+            <span className="text-neutral-400 block text-[10px]">目前牌势</span>
+            <span className="text-purple-300 font-bold text-sm">低谷回升 · 顺流</span>
+          </div>
+        </div>
+
+        <p className="text-xs text-neutral-300 font-serif leading-relaxed bg-neutral-900/40 p-2.5 rounded-xl border border-neutral-800">
+          {insights?.themeSummary}
+        </p>
+      </div>
+
+      {/* Repeated Card Alert if present */}
+      {insights?.repeatedCardAlert && (
+        <div className="w-full p-3 rounded-2xl bg-amber-950/40 border border-amber-500/40 flex items-start gap-2.5 text-xs font-serif">
+          <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-amber-300">
+                重复神谕 · {insights.repeatedCardAlert.card.cardName} ({insights.repeatedCardAlert.card.archetype}) × {insights.repeatedCardAlert.count}
+              </span>
+            </div>
+            <p className="text-neutral-300 text-[11px]">
+              {insights.repeatedCardAlert.message}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 7-Day Score Trend Chart */}
+      <div className="w-full glass-panel rounded-2xl p-4 border border-neutral-800 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-xs font-serif font-bold text-neutral-300">
+            <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+            <span>近 7 日命势指数走势</span>
+          </div>
+          <span className="text-[10px] text-emerald-400 font-mono">
+            {insights?.trendLabel}
+          </span>
+        </div>
+
+        {/* Trend Line Visual */}
+        <div className="flex items-end justify-between gap-1 h-20 pt-2 px-1 border-b border-neutral-800">
+          {insights?.recent7DaysScoreTrend.map((item, idx) => (
+            <div key={idx} className="flex-1 flex flex-col items-center gap-1">
+              <span className="text-[9px] font-mono text-amber-300 font-bold">{item.score}</span>
+              <div
+                style={{ height: `${Math.max(20, (item.score - 50) * 1.8)}%` }}
+                className="w-full max-w-[18px] bg-gradient-to-t from-amber-500/20 to-amber-400 rounded-t-md shadow-[0_0_8px_rgba(212,175,55,0.3)] transition-all duration-500"
+              />
+              <span className="text-[8px] text-neutral-400 truncate max-w-full font-serif">
+                {item.date.slice(-3)}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 

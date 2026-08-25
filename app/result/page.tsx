@@ -3,13 +3,15 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { TopHeader } from '@/components/Layout/TopHeader';
-import { ReadingAnalysis, OracleCardData } from '@/types/oracle';
+import { OracleCardData } from '@/types/oracle';
 import { Storage } from '@/lib/storage';
 import { ORACLE_CARDS } from '@/data/cards';
 import { ReadingSummary } from '@/components/Oracle/ReadingSummary';
 import { OracleCard } from '@/components/Cards/OracleCard';
 import { CardDetailModal } from '@/components/Oracle/CardDetailModal';
-import { Sparkles, ArrowRight, RotateCcw } from 'lucide-react';
+import { analyzeCards } from '@/lib/readingEngine';
+import { IntelligenceReadingResult } from '@/intelligence';
+import { RotateCcw } from 'lucide-react';
 import { sound } from '@/lib/sound';
 
 function ResultContent() {
@@ -17,23 +19,32 @@ function ResultContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
 
-  const [reading, setReading] = useState<ReadingAnalysis | null>(null);
+  const [reading, setReading] = useState<IntelligenceReadingResult | null>(null);
   const [modalCard, setModalCard] = useState<OracleCardData | null>(null);
 
   useEffect(() => {
     const list = Storage.getHistory();
+    let rawReading = null;
     if (id) {
-      const found = list.find((item) => item.id === id);
-      if (found) {
-        setReading(found);
-        return;
-      }
+      rawReading = list.find((item) => item.id === id);
+    } else if (list.length > 0) {
+      rawReading = list[0];
     }
-    // Default to most recent reading if exists
-    if (list.length > 0) {
-      setReading(list[0]);
+
+    if (rawReading) {
+      const cardDataList = rawReading.cards
+        .map((c) => ORACLE_CARDS.find((card) => card.id === c.cardId))
+        .filter((c): c is OracleCardData => !!c);
+
+      const rehydrated = analyzeCards(cardDataList, rawReading.question, rawReading.category, rawReading.spreadType);
+      setReading(rehydrated);
     }
   }, [id]);
+
+  const handleFollowUp = (questionText: string, cardCount: 1 | 3) => {
+    sound.playCardSelect();
+    router.push(`/draw?q=${encodeURIComponent(questionText)}&spread=${cardCount === 1 ? 'three' : 'three'}`);
+  };
 
   if (!reading) {
     return (
@@ -83,7 +94,7 @@ function ResultContent() {
       </div>
 
       {/* Full Reading Summary */}
-      <ReadingSummary reading={reading} />
+      <ReadingSummary reading={reading} onSelectFollowUp={handleFollowUp} />
 
       {/* Actions */}
       <div className="pt-4 flex flex-col gap-2.5">
