@@ -1,0 +1,282 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { TopHeader } from '@/components/Layout/TopHeader';
+import { UserProfile } from '@/types/oracle';
+import { Storage, DEFAULT_USER } from '@/lib/storage';
+import { sound } from '@/lib/sound';
+import { User, Coins, Flame, Layers, Sparkles, Shield, Info, Edit3, Check, Volume2, VolumeX, RefreshCw } from 'lucide-react';
+
+export default function ProfilePage() {
+  const [user, setUser] = useState<UserProfile>(DEFAULT_USER);
+  const [isEditing, setIsEditing] = useState(false);
+  const [nameInput, setNameInput] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [birthPlace, setBirthPlace] = useState('');
+  const [gender, setGender] = useState('');
+  const [isMuted, setIsMuted] = useState(true);
+
+  useEffect(() => {
+    const data = Storage.getUser();
+    setUser(data);
+    setNameInput(data.name);
+    setBirthDate(data.birthDate || '1996-08-18');
+    setBirthPlace(data.birthPlace || '浙江 · 杭州');
+    setGender(data.gender || '坤造 (女)');
+    setIsMuted(sound.getMuted());
+  }, []);
+
+  const handleSaveProfile = () => {
+    sound.playCardSelect();
+    const updated: UserProfile = {
+      ...user,
+      name: nameInput,
+      birthDate,
+      birthPlace,
+      gender,
+    };
+    setUser(updated);
+    Storage.saveUser(updated);
+    setIsEditing(false);
+  };
+
+  const handleAddTokens = () => {
+    sound.playBassHit();
+    const updated: UserProfile = {
+      ...user,
+      tokens: (user.tokens || 0) + 50,
+    };
+    setUser(updated);
+    Storage.saveUser(updated);
+  };
+
+  const handleToggleSound = () => {
+    const nextMute = sound.toggleMute();
+    setIsMuted(nextMute);
+  };
+
+  const elementStats = [
+    { name: '水', percent: 38, color: '#06B6D4', label: '玄水智谋' },
+    { name: '金', percent: 26, color: '#EAB308', label: '刚毅决断' },
+    { name: '木', percent: 18, color: '#10B981', label: '生机成长' },
+    { name: '火', percent: 10, color: '#F43F5E', label: '热情显化' },
+    { name: '土', percent: 8, color: '#F59E0B', label: '厚重承载' },
+  ];
+
+  return (
+    <div className="flex-1 flex flex-col px-4 pt-1 pb-8 space-y-4">
+      <TopHeader title="命主档案" />
+
+      {/* User Hero Card */}
+      <div className="w-full glass-panel rounded-3xl p-5 border border-amber-500/20 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="flex items-center gap-4">
+          {/* Avatar */}
+          <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 via-neutral-900 to-black border-2 border-amber-400/50 flex items-center justify-center text-2xl text-amber-300 shadow-lg">
+            <span>{user.avatar || '☯'}</span>
+            <span className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded-full bg-amber-500 text-black text-[9px] font-bold font-mono">
+              VIP
+            </span>
+          </div>
+
+          {/* Nickname & Zodiac */}
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-serif font-bold text-neutral-100">
+                {user.name}
+              </h2>
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className="text-xs text-neutral-400 hover:text-amber-300 flex items-center gap-1 transition-colors"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>{isEditing ? '取消' : '修改'}</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 mt-1 flex-wrap text-xs">
+              <span className="px-2 py-0.5 rounded-full bg-amber-950/60 border border-amber-500/30 text-amber-300 font-serif text-[11px]">
+                {user.zodiac || '丙子鼠'} · 坤造
+              </span>
+              <span className="text-neutral-400 text-[11px]">
+                {user.birthPlace || '浙江 · 杭州'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Editing Drawer */}
+        {isEditing && (
+          <div className="mt-4 pt-3 border-t border-neutral-800 space-y-2.5 animate-fade-in">
+            <div>
+              <label className="text-[10px] text-neutral-400 font-serif block mb-1">道号 / 昵称</label>
+              <input
+                type="text"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                className="w-full px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-700 text-xs text-neutral-100 focus:outline-none focus:border-amber-400 font-serif"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] text-neutral-400 font-serif block mb-1">出生日期</label>
+                <input
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  className="w-full px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-700 text-xs text-neutral-100 focus:outline-none focus:border-amber-400 font-mono"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-neutral-400 font-serif block mb-1">乾坤性别</label>
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="w-full px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-700 text-xs text-neutral-100 focus:outline-none focus:border-amber-400 font-serif"
+                >
+                  <option value="坤造 (女)">坤造 (女)</option>
+                  <option value="乾造 (男)">乾造 (男)</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] text-neutral-400 font-serif block mb-1">出生地点</label>
+              <input
+                type="text"
+                value={birthPlace}
+                onChange={(e) => setBirthPlace(e.target.value)}
+                className="w-full px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-700 text-xs text-neutral-100 focus:outline-none focus:border-amber-400 font-serif"
+              />
+            </div>
+
+            <button
+              onClick={handleSaveProfile}
+              className="w-full mt-2 py-2 rounded-xl bg-amber-500 text-black font-serif font-bold text-xs flex items-center justify-center gap-1 shadow-md"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>保存命盘资料</span>
+            </button>
+          </div>
+        )}
+
+        {/* Sub metrics stats */}
+        <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-neutral-800/80 text-center">
+          <div>
+            <div className="text-[10px] text-neutral-400 font-serif">天机令</div>
+            <div className="text-base font-mono font-bold text-amber-300">
+              🪙 {user.tokens}
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] text-neutral-400 font-serif">连续占验</div>
+            <div className="text-base font-mono font-bold text-rose-400">
+              🔥 {user.streak} 天
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] text-neutral-400 font-serif">收集图鉴</div>
+            <div className="text-base font-mono font-bold text-emerald-400">
+              {user.collectedCardIds?.length || 17} / 52
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Token Fast Top-up Demo */}
+      <div className="w-full glass-panel rounded-2xl p-4 border border-amber-500/20 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-amber-950/60 text-amber-400 border border-amber-500/30">
+            <Coins className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="text-xs font-serif font-bold text-neutral-200">天机令补给</div>
+            <div className="text-[10px] text-neutral-400">演卦代币 · 每日免费领取</div>
+          </div>
+        </div>
+
+        <button
+          onClick={handleAddTokens}
+          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-serif font-bold text-xs shadow-md active:scale-95 transition-all"
+        >
+          领取 +50 令
+        </button>
+      </div>
+
+      {/* 30-Day Elemental Distribution Chart */}
+      <div className="w-full glass-panel rounded-2xl p-4 border border-neutral-800 space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-[10px] text-neutral-400 font-serif block">近期能量倾向</span>
+            <h3 className="text-sm font-serif font-bold text-neutral-200">
+              你的近期主元素：<span className="text-cyan-300">水 (38%)</span>
+            </h3>
+          </div>
+          <span className="text-[10px] text-amber-400/80 font-serif bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-500/30">
+            近 30 天统计
+          </span>
+        </div>
+
+        {/* Stacked element bar */}
+        <div className="w-full h-3 rounded-full bg-neutral-900 overflow-hidden flex border border-neutral-800">
+          {elementStats.map((el, i) => (
+            <div
+              key={i}
+              style={{ width: `${el.percent}%`, backgroundColor: el.color }}
+              className="h-full"
+              title={`${el.name}: ${el.percent}%`}
+            />
+          ))}
+        </div>
+
+        {/* Detail Legend list */}
+        <div className="space-y-1.5 pt-1">
+          {elementStats.map((el, i) => (
+            <div key={i} className="flex items-center justify-between text-xs font-serif">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: el.color }} />
+                <span className="text-neutral-300">{el.name} · {el.label}</span>
+              </div>
+              <span className="font-mono text-neutral-400">{el.percent}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Settings & Sound */}
+      <div className="w-full glass-panel rounded-2xl p-4 border border-neutral-800 space-y-2.5">
+        <h4 className="text-xs font-serif font-bold text-neutral-300">系统偏好</h4>
+
+        <div className="flex items-center justify-between py-1 text-xs font-serif">
+          <div className="flex items-center gap-2 text-neutral-300">
+            {isMuted ? <VolumeX className="w-4 h-4 text-neutral-500" /> : <Volume2 className="w-4 h-4 text-amber-400" />}
+            <span>神圣音效 (古磬钟声/洗牌)</span>
+          </div>
+          <button
+            onClick={handleToggleSound}
+            className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
+              !isMuted ? 'bg-amber-500' : 'bg-neutral-800'
+            }`}
+          >
+            <div
+              className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                !isMuted ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
+      {/* Disclaimer (Profile > About) */}
+      <div className="w-full p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 space-y-2">
+        <div className="flex items-center gap-1.5 text-xs text-neutral-400 font-serif font-bold">
+          <Shield className="w-3.5 h-3.5 text-amber-400/80" />
+          <span>关于天机52 · 文化体验声明</span>
+        </div>
+        <p className="text-[11px] text-neutral-400 font-serif leading-relaxed">
+          天机52以东方文化、象征系统及娱乐互动为基础，所有内容仅供个人反思、娱乐及文化体验，不构成医疗、法律、投资或其他专业建议。
+        </p>
+      </div>
+    </div>
+  );
+}
