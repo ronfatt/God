@@ -2,78 +2,106 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg-main: #FBF9F4;
-  --bg-secondary: #F3EFE6;
-  --text-main: #1C1917;
-  --text-secondary: #57534E;
-  --gold-primary: #B8860B;
-  --gold-glow: rgba(212, 175, 55, 0.35);
-  --panel-bg: rgba(255, 255, 255, 0.88);
-  --panel-border: rgba(197, 160, 89, 0.35);
+@layer base {
+  :root {
+    --bg-main: #FAF8F5;
+    --bg-secondary: #F4EFE6;
+    --text-main: #1A1715;
+    --text-secondary: #57524E;
+    --gold-primary: #B8860B;
+    --gold-glow: rgba(212, 175, 55, 0.35);
+    --panel-bg: rgba(255, 255, 255, 0.92);
+    --panel-border: rgba(197, 160, 89, 0.38);
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: #F3EFE6;
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Noto Serif SC", "Songti SC", serif, sans-serif;
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
+/* ========================================================= */
+/* 🌟 LUXURY METALLIC & SACRED GRADIENTS                    */
+/* ========================================================= */
 
-body {
-  background-color: var(--bg-main);
-  color: var(--text-main);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Serif SC", "Songti SC", serif, sans-serif;
-  overflow-x: hidden;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-/* Sacred Noble Gold Gradient Text for Bright Theme */
 .text-gold-gradient {
-  background: linear-gradient(135deg, #6B4E0A 0%, #B8860B 40%, #D4AF37 70%, #5E4006 100%);
+  background: linear-gradient(135deg, #78520A 0%, #B8860B 35%, #D4AF37 60%, #8A610A 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-silver-gradient {
-  background: linear-gradient(135deg, #1E293B 0%, #475569 50%, #0F172A 100%);
+  background: linear-gradient(135deg, #1C1917 0%, #44403C 50%, #1C1917 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-crimson-gradient {
-  background: linear-gradient(135deg, #9F1239 0%, #E11D48 60%, #881337 100%);
+  background: linear-gradient(135deg, #881337 0%, #BE123C 60%, #9F1239 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-jade-gradient {
-  background: linear-gradient(135deg, #065F46 0%, #059669 60%, #047857 100%);
+  background: linear-gradient(135deg, #064E3B 0%, #047857 60%, #065F46 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Glassmorphism Classes (Bright, Warm Sacred Rice-White) */
+/* ========================================================= */
+/* 🏛️ PALACE GRADE GLASSMORPHISM PANELS                     */
+/* ========================================================= */
+
 .glass-panel {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(197, 160, 89, 0.3);
-  box-shadow: 0 10px 30px -4px rgba(180, 140, 50, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.94) 0%, rgba(253, 250, 245, 0.88) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(197, 160, 89, 0.32);
+  box-shadow: 
+    0 10px 30px -4px rgba(180, 140, 50, 0.10),
+    0 2px 8px -2px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.glass-panel-gold {
+  background: linear-gradient(145deg, rgba(255, 253, 247, 0.96) 0%, rgba(254, 249, 238, 0.90) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  box-shadow: 
+    0 12px 35px -4px rgba(180, 140, 50, 0.14),
+    0 2px 8px -2px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 15px rgba(212, 175, 55, 0.05);
 }
 
 .glass-panel-dark {
-  background: rgba(253, 250, 245, 0.94);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(250, 248, 245, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(197, 160, 89, 0.35);
   box-shadow: 0 4px 20px -2px rgba(180, 140, 50, 0.08);
 }
 
 .glass-gold-glow {
-  box-shadow: 0 0 25px rgba(212, 175, 55, 0.25), inset 0 0 15px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.3), inset 0 0 15px rgba(212, 175, 55, 0.1);
 }
 
-/* 3D Perspective Card Support */
+/* ========================================================= */
+/* 🎴 SACRED 3D CARD INTERACTIONS                            */
+/* ========================================================= */
+
 .perspective-1000 {
   perspective: 1000px;
 }
@@ -91,31 +119,59 @@ body {
   transform: rotateY(180deg);
 }
 
-/* Custom Scrollbar */
+/* ========================================================= */
+/* ⚡ ANIMATIONS & LUXURY SHIMMER                            */
+/* ========================================================= */
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulseSlow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.08); }
+}
+
+@keyframes glowBreathe {
+  0%, 100% { 
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.35), 0 4px 16px rgba(180, 140, 50, 0.12);
+  }
+  50% { 
+    box-shadow: 0 0 32px rgba(212, 175, 55, 0.7), 0 6px 24px rgba(212, 175, 55, 0.25);
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 32s linear infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 7s ease-in-out infinite;
+}
+
+.animate-glow-breathe {
+  animation: glowBreathe 3s ease-in-out infinite;
+}
+
+/* ========================================================= */
+/* 📜 CUSTOM SCROLLBAR & SELECTION                           */
+/* ========================================================= */
+
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(240, 235, 225, 0.8);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(197, 160, 89, 0.5);
-  border-radius: 4px;
+  background: rgba(180, 140, 50, 0.25);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(184, 134, 11, 0.8);
-}
-
-/* Shimmer & Golden Flow Animation */
-@keyframes goldShine {
-  0% { transform: translateX(-100%) rotate(45deg); }
-  100% { transform: translateX(200%) rotate(45deg); }
-}
-
-.animate-gold-shine {
-  animation: goldShine 3s infinite ease-in-out;
+  background: rgba(180, 140, 50, 0.45);
 }
