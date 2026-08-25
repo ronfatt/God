@@ -112,7 +112,7 @@ export const CardDeck: React.FC<CardDeckProps> = ({
                   isSelected && 'z-30 shadow-[0_12px_30px_rgba(212,175,55,0.5)]'
                 )}
                 style={{
-                  aspectRatio: '129/246',
+                  aspectRatio: '2/3',
                   marginRight: '-14px',
                 }}
               >

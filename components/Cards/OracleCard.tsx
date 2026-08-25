@@ -50,7 +50,7 @@ export const OracleCard: React.FC<OracleCardProps> = ({
         className
       )}
       style={{
-        aspectRatio: '129/246',
+        aspectRatio: '2/3',
       }}
     >
       {/* 1. Genuine Sacred High-Res Card Artwork Face */}

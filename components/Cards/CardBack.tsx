@@ -22,7 +22,7 @@ export const CardBack: React.FC<CardBackProps> = ({
         className
       )}
       style={{
-        aspectRatio: '129/246',
+        aspectRatio: '2/3',
       }}
     >
       {/* Outer Golden Inset Filigree Frame */}

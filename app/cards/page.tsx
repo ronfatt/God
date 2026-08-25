@@ -182,7 +182,7 @@ export default function CardsPage() {
                     card.suit === 'club' && 'border-emerald-400/70 hover:border-emerald-400',
                     card.suit === 'spade' && 'border-purple-400/70 hover:border-purple-400'
                   )}
-                  style={{ aspectRatio: '2/3.5' }}
+                  style={{ aspectRatio: '2/3' }}
                 >
                   {/* Card Artwork Image */}
                   <div className="relative w-full h-full">
