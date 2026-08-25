@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { TopHeader } from '@/components/Layout/TopHeader';
 import { OracleCardData, SpreadType, QuestionCategory, CardDrawResult } from '@/types/oracle';
 import { SPREAD_CONFIGS } from '@/data/cards';
+import { RitualMeditation } from '@/components/Oracle/RitualMeditation';
 import { ShuffleAnimation } from '@/components/Oracle/ShuffleAnimation';
 import { CutDeckAnimation } from '@/components/Oracle/CutDeckAnimation';
 import { CardDeck } from '@/components/Oracle/CardDeck';
@@ -35,11 +36,21 @@ function DrawContent() {
 
   const spreadConfig = SPREAD_CONFIGS.find((s) => s.type === spreadType) || SPREAD_CONFIGS[0];
 
-  // Flow State: 'shuffle' -> 'cut' -> 'deck' -> 'reveal' -> 'result'
-  const [phase, setPhase] = useState<'shuffle' | 'cut' | 'deck' | 'reveal' | 'result'>('shuffle');
+  // Flow State: 'ritual' (东方洗心祈请) -> 'shuffle' -> 'cut' -> 'deck' -> 'reveal' -> 'result'
+  const [phase, setPhase] = useState<'ritual' | 'shuffle' | 'cut' | 'deck' | 'reveal' | 'result'>('ritual');
   const [drawnCards, setDrawnCards] = useState<CardDrawResult[]>([]);
   const [readingResult, setReadingResult] = useState<IntelligenceReadingResult | null>(null);
   const [modalCard, setModalCard] = useState<OracleCardData | null>(null);
+
+  // Once ritual is complete -> go to Shuffle
+  const handleRitualComplete = () => {
+    setPhase('shuffle');
+  };
+
+  // Skip ritual directly
+  const handleSkipRitual = () => {
+    setPhase('shuffle');
+  };
 
   // Once shuffle is done -> go to Cut Deck
   const handleShuffleComplete = () => {
@@ -138,27 +149,40 @@ function DrawContent() {
         title={isClarifier ? '追问澄清神谕' : spreadConfig.title}
         showBack
         onBack={() => {
-          if (phase === 'result') {
+          if (phase === 'result' || isAllRevealed) {
             router.push('/');
           } else {
-            router.push('/spread');
+            router.back();
           }
         }}
       />
 
-      {/* Progress & Step Indicator */}
+      {/* Question Context Banner & Phase Progress Tracker */}
       <div className="w-full flex items-center justify-between px-2 pt-1 text-xs font-serif border-b border-stone-200 pb-2">
         <span className="text-amber-900 font-bold truncate max-w-[200px]">
           {isClarifier ? '追问：' : '问：'}{question}
         </span>
         <span className="text-stone-500 text-[11px] font-medium">
-          {phase === 'shuffle' && '第一阶段 · 洗牌聚气'}
-          {phase === 'cut' && '第二阶段 · 切牌定序'}
-          {phase === 'deck' && '第三阶段 · 直觉抽牌'}
-          {phase === 'reveal' && '第四阶段 · 翻牌显圣'}
-          {phase === 'result' && '第五阶段 · 天机尽释'}
+          {phase === 'ritual' && '第一阶段 · 洗心祈请'}
+          {phase === 'shuffle' && '第二阶段 · 乾坤洗牌'}
+          {phase === 'cut' && '第三阶段 · 切牌定序'}
+          {phase === 'deck' && '第四阶段 · 直觉抽牌'}
+          {phase === 'reveal' && '第五阶段 · 翻牌显圣'}
+          {phase === 'result' && '第六阶段 · 天机尽释'}
         </span>
       </div>
+
+      {/* STEP 0: RITUAL MEDITATION (洗心祈请仪式) */}
+      {phase === 'ritual' && (
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <RitualMeditation
+            question={question}
+            category={category}
+            onComplete={handleRitualComplete}
+            onSkip={handleSkipRitual}
+          />
+        </div>
+      )}
 
       {/* STEP 1: SHUFFLE */}
       {phase === 'shuffle' && (
@@ -248,35 +272,26 @@ function DrawContent() {
 
           {/* If all cards are revealed, show Intelligence Reading Summary */}
           {isAllRevealed && readingResult && (
-            <div className="w-full space-y-4 pt-3 border-t border-stone-200 animate-fade-in">
+            <div className="w-full space-y-4 pt-2">
               <ReadingSummary
                 reading={readingResult}
                 onSelectFollowUp={handleFollowUpSelect}
               />
 
-              {/* Bottom Actions */}
-              <div className="pt-4 flex flex-col gap-2.5">
+              {/* Bottom Fixed Action to Start New or View History */}
+              <div className="w-full flex items-center gap-2 pt-2">
                 <button
-                  onClick={() => {
-                    sound.playCardSelect();
-                    router.push('/journey');
-                  }}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-stone-950 font-serif font-black text-sm shadow-[0_4px_20px_rgba(212,175,55,0.4)] flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+                  onClick={() => router.push('/spread')}
+                  className="flex-1 py-3.5 rounded-2xl bg-amber-500 text-stone-950 font-serif font-black text-xs hover:bg-amber-400 transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95"
                 >
-                  <Sparkles className="w-4 h-4 fill-stone-950" />
-                  <span>天机已载入生命轨迹 · 查看我的轨迹</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <RotateCcw className="w-4 h-4" />
+                  <span>再启新问 · 重占天机</span>
                 </button>
-
                 <button
-                  onClick={() => {
-                    sound.playCardSelect();
-                    router.push('/question');
-                  }}
-                  className="w-full py-3 rounded-2xl bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 font-serif font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
+                  onClick={() => router.push('/history')}
+                  className="px-5 py-3.5 rounded-2xl bg-white border border-amber-300 text-amber-900 font-serif font-bold text-xs hover:bg-amber-50 transition-all shadow-xs active:scale-95"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>问另一事 · 重新起卦</span>
+                  查看历史
                 </button>
               </div>
             </div>
@@ -284,7 +299,7 @@ function DrawContent() {
         </div>
       )}
 
-      {/* Card Detail Modal */}
+      {/* Card Detail Bottom Sheet Modal */}
       <CardDetailModal
         card={modalCard}
         onClose={() => setModalCard(null)}
@@ -295,7 +310,16 @@ function DrawContent() {
 
 export default function DrawPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-amber-800 font-serif text-xs">正在进入神谕空间...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+          <div className="text-center space-y-2">
+            <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin mx-auto" />
+            <p className="text-xs text-stone-500 font-serif">正在沟通天地气机...</p>
+          </div>
+        </div>
+      }
+    >
       <DrawContent />
     </Suspense>
   );
