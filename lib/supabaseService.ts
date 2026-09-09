@@ -69,7 +69,7 @@ export const SupabaseService = {
         birthDate: params.birthDate || '1996-08-18',
         birthTime: '10:30',
         gender: params.gender || '坤造 (女)',
-        birthPlace: '浙江 · 杭州',
+        birthPlace: '吉隆坡 (Kuala Lumpur)',
         zodiac: '丙子鼠',
         mainElement: 'water',
         collectedCardIds: ['H-A', 'D-A', 'C-A', 'S-A'],

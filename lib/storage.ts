@@ -15,30 +15,27 @@ const PRIVACY_STORAGE_KEY = 'tianji_privacy_v3';
 const ONBOARDING_COMPLETED_KEY = 'tianji_onboarding_done';
 const ACCOUNTS_STORAGE_KEY = 'tianji_registered_accounts_v4';
 const CURRENT_USER_ID_KEY = 'tianji_current_user_id';
+const DAILY_ONE_CARD_KEY = 'tianji_daily_one_card_usage_v1';
+export const MAX_DAILY_ONE_CARD_DRAWS = 3;
 
 export const DEFAULT_USER: UserProfile = {
-  name: '天机居士',
+  name: '随喜居士',
   avatar: '☯',
-  tokens: 120,
-  streak: 7,
-  totalDraws: 14,
+  tokens: 0, // Unregistered guest starts with 0. Registering grants 150 one-time welcome tokens!
+  streak: 1,
+  totalDraws: 0,
   birthDate: '1996-08-18',
   birthTime: '10:30',
   gender: '坤造 (女)',
   birthPlace: '吉隆坡 (Kuala Lumpur)',
   zodiac: '丙子鼠',
   mainElement: 'water',
-  collectedCardIds: [
-    'H-A', 'H-Q', 'H-2', 'H-9',
-    'D-A', 'D-3', 'D-5', 'D-K',
-    'C-A', 'C-2', 'C-9', 'C-K',
-    'S-A', 'S-3', 'S-4', 'S-Q', 'S-K'
-  ],
+  collectedCardIds: ['H-A', 'D-A', 'C-A', 'S-A'],
 };
 
 export const DEFAULT_BIRTH_PROFILE: BirthProfile = {
   userId: 'user_tianji_01',
-  nickname: '天机居士',
+  nickname: '随喜居士',
   birthDate: '1996-08-18',
   birthTime: '10:30',
   birthPlace: '吉隆坡 (Kuala Lumpur)',
@@ -81,6 +78,7 @@ export const Storage = {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      window.dispatchEvent(new Event('storage'));
     } catch (e) {
       console.error('Failed to save user', e);
     }
@@ -140,17 +138,18 @@ export const Storage = {
 
   // 4. Wallet & Tokens
   getWallet(): TianjiWallet {
-    if (typeof window === 'undefined') return createInitialWallet(120);
+    if (typeof window === 'undefined') return createInitialWallet(0);
     try {
       const data = localStorage.getItem(WALLET_STORAGE_KEY);
       if (!data) {
-        const initial = createInitialWallet(this.getUser().tokens || 120);
+        const user = this.getUser();
+        const initial = createInitialWallet(user.tokens ?? 0);
         localStorage.setItem(WALLET_STORAGE_KEY, JSON.stringify(initial));
         return initial;
       }
       return JSON.parse(data);
     } catch {
-      return createInitialWallet(120);
+      return createInitialWallet(0);
     }
   },
 
@@ -160,7 +159,8 @@ export const Storage = {
       localStorage.setItem(WALLET_STORAGE_KEY, JSON.stringify(wallet));
       const user = this.getUser();
       user.tokens = wallet.balance;
-      this.saveUser(user);
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      window.dispatchEvent(new Event('storage'));
     } catch (e) {
       console.error('Failed to save wallet', e);
     }
@@ -196,6 +196,46 @@ export const Storage = {
       dateStr: new Date().toLocaleDateString('zh-CN'),
     });
     this.saveWallet(wallet);
+  },
+
+  // 4.1 Daily One Card Limit Tracking (每日限 3 次)
+  getDailyOneCardUsage(): { date: string; count: number } {
+    if (typeof window === 'undefined') return { date: '', count: 0 };
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const data = localStorage.getItem(DAILY_ONE_CARD_KEY);
+      if (!data) return { date: today, count: 0 };
+      const parsed = JSON.parse(data);
+      if (parsed.date !== today) {
+        return { date: today, count: 0 };
+      }
+      return parsed;
+    } catch {
+      return { date: '', count: 0 };
+    }
+  },
+
+  getDailyOneCardRemaining(): number {
+    const usage = this.getDailyOneCardUsage();
+    return Math.max(0, MAX_DAILY_ONE_CARD_DRAWS - (usage.count || 0));
+  },
+
+  canDrawOneCard(): boolean {
+    return this.getDailyOneCardRemaining() > 0;
+  },
+
+  recordOneCardDraw(): boolean {
+    if (typeof window === 'undefined') return true;
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const usage = this.getDailyOneCardUsage();
+      const newCount = (usage.date === today ? (usage.count || 0) : 0) + 1;
+      localStorage.setItem(DAILY_ONE_CARD_KEY, JSON.stringify({ date: today, count: newCount }));
+      window.dispatchEvent(new Event('storage'));
+      return true;
+    } catch {
+      return false;
+    }
   },
 
   // 5. Entitlement & Subscription
@@ -403,22 +443,24 @@ export const Storage = {
         id: newId,
         name: params.nickname || cleanUsername,
         avatar: '☯',
-        tokens: 150, // Register bonus 150 tokens!
+        tokens: 150, // One-time welcome registration bonus of 150 tokens!
         streak: 1,
         totalDraws: 0,
         birthDate: params.birthDate || '1996-08-18',
         birthTime: '10:30',
         gender: params.gender || '坤造 (女)',
-        birthPlace: '浙江 · 杭州',
+        birthPlace: '吉隆坡 (Kuala Lumpur)',
         zodiac: '丙子鼠',
         mainElement: 'water',
         collectedCardIds: ['H-A', 'D-A', 'C-A', 'S-A'],
         account: newAccount,
       };
 
+      const initWallet = createInitialWallet(150);
+      this.saveWallet(initWallet);
       this.saveUser(newUserProfile);
       this.setOnboardingCompleted();
-      return { success: true, message: '恭喜！天机缘籍已成功开辟', user: newUserProfile };
+      return { success: true, message: '恭喜！天机缘籍已成功开辟，获赠150灵石', user: newUserProfile };
     } catch (e) {
       console.error(e);
       return { success: false, message: '注册失败，请稍后重试' };

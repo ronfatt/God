@@ -1,13 +1,14 @@
 'use client';
 
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { TopHeader } from '@/components/Layout/TopHeader';
-import { SpreadType } from '@/types/oracle';
+import { SpreadType, UserProfile } from '@/types/oracle';
 import { SPREAD_CONFIGS } from '@/data/cards';
-import { Sparkles, Crown, ArrowRight, Layers, Coins, Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Crown, ArrowRight, Layers, Coins, Lock, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 import { sound } from '@/lib/sound';
-import { Storage } from '@/lib/storage';
+import { Storage, MAX_DAILY_ONE_CARD_DRAWS } from '@/lib/storage';
+import { AuthModal } from '@/components/Auth/AuthModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function SpreadContent() {
@@ -16,11 +17,26 @@ function SpreadContent() {
   const category = searchParams.get('category') || 'general';
   const question = searchParams.get('q') || '今日神谕·乾坤运势';
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [dailyOneRemaining, setDailyOneRemaining] = useState<number>(3);
+  const [user, setUser] = useState<UserProfile>(Storage.getUser());
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+
+  useEffect(() => {
+    setDailyOneRemaining(Storage.getDailyOneCardRemaining());
+    setUser(Storage.getUser());
+
+    const handleStorageChange = () => {
+      setDailyOneRemaining(Storage.getDailyOneCardRemaining());
+      setUser(Storage.getUser());
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const showToast = (msg: string) => {
     sound.playBassHit();
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 2500);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const handleSelectSpread = (spreadType: SpreadType, tokenCost: number, isComingSoon?: boolean) => {
@@ -29,11 +45,33 @@ function SpreadContent() {
       return;
     }
 
-    sound.playCardSelect();
-
-    if (tokenCost > 0) {
-      Storage.consumeTokens(tokenCost, `开启 ${spreadType} 牌阵`);
+    if (spreadType === 'one') {
+      if (!Storage.canDrawOneCard()) {
+        showToast('【今日限额已满】一牌定音每日限 3 次免费结缘。明日子时重置，或体验「三才神谕」推演！');
+        return;
+      }
     }
+
+    if (spreadType === 'three' || tokenCost > 0) {
+      const currentWallet = Storage.getWallet();
+      const currentUser = Storage.getUser();
+      const availableTokens = currentWallet.balance ?? currentUser.tokens ?? 0;
+
+      if (availableTokens < tokenCost) {
+        showToast(`【灵石不足】三才神谕需扣除 ${tokenCost} 灵石（当前剩余 ${availableTokens}）。注册开辟缘籍即可获赠 150 灵石！`);
+        setTimeout(() => setIsAuthOpen(true), 900);
+        return;
+      }
+
+      // Deduct tokens
+      const success = Storage.consumeTokens(tokenCost, `开启 ${spreadType === 'three' ? '三才神谕' : spreadType} 牌阵`);
+      if (!success) {
+        showToast('灵石扣除未成功，请稍后再试');
+        return;
+      }
+    }
+
+    sound.playCardSelect();
 
     router.push(
       `/draw?category=${encodeURIComponent(category)}&q=${encodeURIComponent(
@@ -53,9 +91,9 @@ function SpreadContent() {
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-stone-900/90 text-amber-300 border border-amber-500/60 shadow-xl text-xs font-serif flex items-center gap-2 max-w-[340px] text-center backdrop-blur-md"
+            className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-stone-900/95 text-amber-300 border border-amber-500/60 shadow-2xl text-xs font-serif flex items-center gap-2 max-w-[340px] text-center backdrop-blur-md"
           >
-            <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
             <span>{toastMessage}</span>
           </motion.div>
         )}
@@ -70,18 +108,20 @@ function SpreadContent() {
           选择你的演卦阵法
         </h1>
         <p className="text-xs text-stone-600 font-serif font-medium">
-          基础版优先开放「一牌定音」与「三才神谕」，高维命盘即将登场
+          基础版优先开放「一牌定音」(每日3次) 与「三才神谕」(10灵石)
         </p>
       </div>
 
       {/* Spread Cards */}
       <div className="space-y-3.5 pt-1">
-        {/* 1. 一牌定音 (Single Card) */}
+        {/* 1. 一牌定音 (Single Card - 每日限 3 次) */}
         <motion.div
           whileHover={{ scale: 1.015, y: -2 }}
           whileTap={{ scale: 0.985 }}
           onClick={() => handleSelectSpread('one', 0, false)}
-          className="w-full p-4.5 rounded-3xl glass-panel-gold border-2 border-amber-400 hover:border-amber-500 transition-all duration-300 cursor-pointer relative overflow-hidden group shadow-xs hover:shadow-md"
+          className={`w-full p-4.5 rounded-3xl glass-panel-gold border-2 transition-all duration-300 cursor-pointer relative overflow-hidden group shadow-xs hover:shadow-md ${
+            dailyOneRemaining > 0 ? 'border-amber-400 hover:border-amber-500' : 'border-stone-300 opacity-90'
+          }`}
         >
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3.5">
@@ -93,8 +133,8 @@ function SpreadContent() {
                   <h3 className="text-base font-serif font-black text-stone-900 group-hover:text-amber-950 transition-colors">
                     一牌定音 · 基础神谕
                   </h3>
-                  <span className="text-[9.5px] px-2 py-0.2 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-950 font-serif font-bold">
-                    基础开放
+                  <span className="text-[9.5px] px-2 py-0.2 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-950 font-serif font-bold flex items-center gap-0.5">
+                    <span>每日限3次</span>
                   </span>
                 </div>
                 <span className="text-[10px] text-stone-500 font-mono tracking-wider uppercase font-bold block">
@@ -103,8 +143,12 @@ function SpreadContent() {
               </div>
             </div>
             <div className="text-right">
-              <span className="text-xs font-serif font-black text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                免费
+              <span className={`text-xs font-serif font-black px-2.5 py-0.5 rounded-full border ${
+                dailyOneRemaining > 0
+                  ? 'text-emerald-800 bg-emerald-50 border-emerald-300'
+                  : 'text-stone-500 bg-stone-100 border-stone-300'
+              }`}>
+                {dailyOneRemaining > 0 ? `免费 · 余 ${dailyOneRemaining}/3 次` : '今日已用完 (0/3)'}
               </span>
             </div>
           </div>
@@ -114,19 +158,22 @@ function SpreadContent() {
           </p>
 
           <div className="mt-3 pt-2.5 border-t border-amber-900/10 flex items-center justify-between text-xs">
-            <span className="text-[11px] text-stone-500 font-serif">推荐即时问事、单点吉凶断验</span>
+            <span className="text-[11px] text-stone-500 font-serif flex items-center gap-1">
+              <Clock className="w-3 h-3 text-amber-700" />
+              <span>今日剩余可用: <b className="text-amber-900 font-mono">{dailyOneRemaining}</b> 次</span>
+            </span>
             <span className="text-amber-900 font-serif font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-              <span>立即抽牌</span>
+              <span>{dailyOneRemaining > 0 ? '立即抽牌' : '今日已满'}</span>
               <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
             </span>
           </div>
         </motion.div>
 
-        {/* 2. 三才神谕 (Three Cards) */}
+        {/* 2. 三才神谕 (Three Cards - 扣除 10 灵石) */}
         <motion.div
           whileHover={{ scale: 1.015, y: -2 }}
           whileTap={{ scale: 0.985 }}
-          onClick={() => handleSelectSpread('three', 0, false)}
+          onClick={() => handleSelectSpread('three', 10, false)}
           className="w-full p-4.5 rounded-3xl glass-panel border-2 border-stone-200 hover:border-amber-400 transition-all duration-300 cursor-pointer relative overflow-hidden group shadow-xs hover:shadow-md"
         >
           <div className="flex items-start justify-between">
@@ -139,7 +186,7 @@ function SpreadContent() {
                   <h3 className="text-base font-serif font-black text-stone-900 group-hover:text-amber-950 transition-colors">
                     三才神谕 · 乾坤推演
                   </h3>
-                  <span className="text-[9.5px] px-2 py-0.2 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-900 font-serif font-bold">
+                  <span className="text-[9.5px] px-2 py-0.2 rounded-full bg-amber-50 border border-amber-300 text-amber-900 font-serif font-bold">
                     完整开放
                   </span>
                 </div>
@@ -149,18 +196,19 @@ function SpreadContent() {
               </div>
             </div>
             <div className="text-right">
-              <span className="text-xs font-serif font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                免费
-              </span>
+              <div className="flex items-center gap-1 text-amber-950 font-mono font-black text-xs bg-amber-100/90 px-2.5 py-0.5 rounded-full border border-amber-400 shadow-2xs">
+                <Coins className="w-3.5 h-3.5 text-amber-700" />
+                <span>10 灵石</span>
+              </div>
             </div>
           </div>
 
           <p className="text-xs text-stone-700 font-serif mt-3 leading-relaxed font-medium bg-white/60 p-2.5 rounded-2xl border border-stone-200/60">
-            天、地、人三维交织，快速剖析事件过去根源、当下症结与未来走向。
+            天、地、人三维交织，深度剖析事件过去根源、当下症结与未来走向。
           </p>
 
           <div className="mt-3 pt-2.5 border-t border-amber-900/10 flex items-center justify-between text-xs">
-            <span className="text-[11px] text-stone-500 font-serif">推荐全面分析因缘、状态与走向</span>
+            <span className="text-[11px] text-stone-500 font-serif">推荐全面分析因缘、状态与走向（消耗10灵石）</span>
             <span className="text-amber-900 font-serif font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
               <span>立即布阵</span>
               <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -258,6 +306,14 @@ function SpreadContent() {
           </div>
         </motion.div>
       </div>
+
+      {/* Auth Modal for Token Top-up/Registration */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        initialMode="register"
+        onClose={() => setIsAuthOpen(false)}
+        onSuccess={(newUser) => setUser(newUser)}
+      />
     </div>
   );
 }
@@ -269,3 +325,4 @@ export default function SpreadPage() {
     </Suspense>
   );
 }
+

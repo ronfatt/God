@@ -66,6 +66,10 @@ function DrawContent() {
 
   // Once user selects cards from 52-card deck
   const handleCardsSelected = (selected: OracleCardData[]) => {
+    if (spreadType === 'one' && !isClarifier) {
+      Storage.recordOneCardDraw();
+    }
+
     const formatted: CardDrawResult[] = selected.map((card, idx) => ({
       position: spreadConfig.positions[idx] || {
         id: `pos_${idx}`,

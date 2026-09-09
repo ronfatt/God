@@ -15,6 +15,8 @@ export interface TianjiWallet {
 }
 
 export const TOKEN_COSTS = {
+  spreadOne: 0,
+  spreadThree: 10,
   clarifier1Card: 10,
   followUp3Cards: 20,
   spreadSix: 20,
@@ -22,13 +24,13 @@ export const TOKEN_COSTS = {
   aiDeepReading: 30,
 };
 
-export function createInitialWallet(initialTokens = 120): TianjiWallet {
+export function createInitialWallet(initialTokens = 0): TianjiWallet {
   const dateStr = new Date().toLocaleDateString('zh-CN');
   return {
     balance: initialTokens,
     lifetimeEarned: initialTokens,
     lifetimeSpent: 0,
-    transactions: [
+    transactions: initialTokens > 0 ? [
       {
         id: 'tx_init',
         type: 'earn',
@@ -37,6 +39,7 @@ export function createInitialWallet(initialTokens = 120): TianjiWallet {
         timestamp: Date.now(),
         dateStr,
       },
-    ],
+    ] : [],
   };
 }
+

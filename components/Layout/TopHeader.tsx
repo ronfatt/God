@@ -97,7 +97,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ title, showBack, onBack })
         {/* Token Balance */}
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-50 to-white border border-amber-300 text-amber-900 text-xs shadow-xs">
           <Coins className="w-3.5 h-3.5 text-amber-600" />
-          <span className="font-mono font-black">{user?.tokens ?? 120}</span>
+          <span className="font-mono font-black">{user?.tokens ?? 0}</span>
         </div>
 
         {/* Sound Toggle */}
