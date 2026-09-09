@@ -43,19 +43,22 @@ export const DailyOneCard: React.FC = () => {
   };
 
   return (
-    <div className="w-full glass-panel rounded-3xl p-4 border border-amber-400/40 shadow-sm flex flex-col items-center relative overflow-hidden">
+    <div className="w-full glass-panel-gold rounded-3xl p-5 border-2 border-amber-400/60 shadow-[0_10px_35px_rgba(180,140,50,0.14)] flex flex-col items-center relative overflow-hidden">
+      {/* Mystic Golden Background Halo */}
+      <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-64 h-64 bg-amber-300/20 rounded-full blur-3xl pointer-events-none" />
+
       {/* Top Header */}
-      <div className="w-full flex items-center justify-between mb-3">
+      <div className="w-full flex items-center justify-between mb-3 relative z-10">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-amber-600 animate-ping" />
-          <h3 className="text-sm font-serif font-bold text-stone-900 tracking-wider">
+          <span className="w-2 h-2 rounded-full bg-amber-600 shadow-[0_0_8px_#D4AF37]" />
+          <h3 className="text-sm font-serif font-black text-amber-950 tracking-wider">
             今日一牌 · 灵犀感应
           </h3>
         </div>
         {isRevealed && (
           <button
             onClick={handleRedraw}
-            className="text-[11px] text-stone-500 hover:text-amber-800 flex items-center gap-1 transition-colors font-serif font-medium"
+            className="text-[11px] text-amber-900/80 hover:text-amber-950 flex items-center gap-1 transition-colors font-serif font-bold px-2 py-0.5 rounded-full bg-amber-100/60 border border-amber-300/60 shadow-2xs"
           >
             <RefreshCw className="w-3 h-3" />
             <span>重新感应</span>
