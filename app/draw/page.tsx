@@ -9,6 +9,7 @@ import { RitualMeditation } from '@/components/Oracle/RitualMeditation';
 import { ShuffleAnimation } from '@/components/Oracle/ShuffleAnimation';
 import { CutDeckAnimation } from '@/components/Oracle/CutDeckAnimation';
 import { CardDeck } from '@/components/Oracle/CardDeck';
+import { OneCardSpread } from '@/components/Oracle/OneCardSpread';
 import { ThreeCardSpread } from '@/components/Oracle/ThreeCardSpread';
 import { SixCardSpread } from '@/components/Oracle/SixCardSpread';
 import { NineCardSpread } from '@/components/Oracle/NineCardSpread';
@@ -238,6 +239,14 @@ function DrawContent() {
 
           {/* Render Active Spread Array */}
           <div className="w-full">
+            {spreadType === 'one' && (
+              <OneCardSpread
+                cards={drawnCards}
+                onFlipCard={handleFlipCard}
+                onCardClick={(card) => setModalCard(card)}
+              />
+            )}
+
             {spreadType === 'three' && (
               <ThreeCardSpread
                 cards={drawnCards}

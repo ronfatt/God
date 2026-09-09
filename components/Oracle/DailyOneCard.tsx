@@ -84,13 +84,23 @@ export const DailyOneCard: React.FC = () => {
             “{dailyCard.oracle || dailyCard.oracleMessage}”
           </p>
 
-          <Link
-            href={`/cards/${dailyCard.id}`}
-            className="mt-2 text-[11px] text-amber-800 hover:text-amber-950 font-bold flex items-center gap-1 transition-colors font-serif underline decoration-amber-500/40 underline-offset-2"
-          >
-            <BookOpen className="w-3 h-3" />
-            <span>查看完整神谕密语与五行解说</span>
-          </Link>
+          <div className="flex items-center gap-2 mt-3 pt-2 border-t border-amber-900/10 w-full">
+            <Link
+              href={`/draw?category=general&q=${encodeURIComponent('今日一牌 · 灵犀定数')}&spread=one`}
+              className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 font-serif font-black text-xs hover:bg-amber-400 transition-all flex items-center justify-center gap-1 shadow-xs active:scale-95"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>起卦推演此牌</span>
+            </Link>
+
+            <Link
+              href={`/cards/${dailyCard.id}`}
+              className="py-2 px-3 rounded-xl bg-white border border-amber-300 text-amber-900 text-xs font-serif font-bold hover:bg-amber-50 transition-colors flex items-center justify-center gap-1 shadow-2xs"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>典籍</span>
+            </Link>
+          </div>
         </div>
       )}
     </div>

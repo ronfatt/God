@@ -1,4 +1,4 @@
-import { UserProfile, ReadingAnalysis } from '@/types/oracle';
+import { UserProfile, ReadingAnalysis, UserAccount } from '@/types/oracle';
 import { BirthProfile, calculateProfileCompleteness } from '@/personal/birthProfile';
 import { UserEntitlement } from '@/premium/entitlement';
 import { TianjiWallet, createInitialWallet } from '@/premium/tokenWallet';
@@ -13,6 +13,8 @@ const STREAK_STORAGE_KEY = 'tianji_streak_v3';
 const ENTITLEMENT_STORAGE_KEY = 'tianji_entitlement_v3';
 const PRIVACY_STORAGE_KEY = 'tianji_privacy_v3';
 const ONBOARDING_COMPLETED_KEY = 'tianji_onboarding_done';
+const ACCOUNTS_STORAGE_KEY = 'tianji_registered_accounts_v4';
+const CURRENT_USER_ID_KEY = 'tianji_current_user_id';
 
 export const DEFAULT_USER: UserProfile = {
   name: '天机居士',
@@ -343,7 +345,157 @@ export const Storage = {
     }
   },
 
-  // 11. Data Reset
+  // 11. Member Accounts & Multi-User System
+  getAllAccounts(): UserAccount[] {
+    if (typeof window === 'undefined') return [];
+    try {
+      const data = localStorage.getItem(ACCOUNTS_STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  registerAccount(params: {
+    username: string;
+    email?: string;
+    phone?: string;
+    password?: string;
+    nickname?: string;
+    birthDate?: string;
+    gender?: string;
+  }): { success: boolean; message: string; user?: UserProfile } {
+    if (typeof window === 'undefined') return { success: false, message: '环境异常' };
+    try {
+      const accounts = this.getAllAccounts();
+      const cleanUsername = params.username.trim();
+
+      if (accounts.some((a) => a.username.toLowerCase() === cleanUsername.toLowerCase())) {
+        return { success: false, message: '该道号/用户名已被注册，请直接登录' };
+      }
+      const trimmedEmail = params.email ? params.email.trim() : undefined;
+      const trimmedPhone = params.phone ? params.phone.trim() : undefined;
+
+      if (trimmedEmail && accounts.some((a) => a.email === trimmedEmail)) {
+        return { success: false, message: '该电子邮箱已被绑定' };
+      }
+      if (trimmedPhone && accounts.some((a) => a.phone === trimmedPhone)) {
+        return { success: false, message: '该手机号码已被绑定' };
+      }
+
+      const newId = `usr_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+      const newAccount: UserAccount = {
+        id: newId,
+        username: cleanUsername,
+        email: params.email?.trim(),
+        phone: params.phone?.trim(),
+        passwordHash: params.password ? btoa(params.password) : undefined,
+        isRegistered: true,
+        registeredAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+      };
+
+      accounts.push(newAccount);
+      localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts));
+      localStorage.setItem(CURRENT_USER_ID_KEY, newId);
+
+      const newUserProfile: UserProfile = {
+        id: newId,
+        name: params.nickname || cleanUsername,
+        avatar: '☯',
+        tokens: 150, // Register bonus 150 tokens!
+        streak: 1,
+        totalDraws: 0,
+        birthDate: params.birthDate || '1996-08-18',
+        birthTime: '10:30',
+        gender: params.gender || '坤造 (女)',
+        birthPlace: '浙江 · 杭州',
+        zodiac: '丙子鼠',
+        mainElement: 'water',
+        collectedCardIds: ['H-A', 'D-A', 'C-A', 'S-A'],
+        account: newAccount,
+      };
+
+      this.saveUser(newUserProfile);
+      this.setOnboardingCompleted();
+      return { success: true, message: '恭喜！天机缘籍已成功开辟', user: newUserProfile };
+    } catch (e) {
+      console.error(e);
+      return { success: false, message: '注册失败，请稍后重试' };
+    }
+  },
+
+  loginAccount(identifier: string, password?: string): { success: boolean; message: string; user?: UserProfile } {
+    if (typeof window === 'undefined') return { success: false, message: '环境异常' };
+    try {
+      const accounts = this.getAllAccounts();
+      const cleanId = identifier.trim().toLowerCase();
+
+      const found = accounts.find(
+        (a) =>
+          a.username.toLowerCase() === cleanId ||
+          (a.email && a.email.toLowerCase() === cleanId) ||
+          (a.phone && a.phone === cleanId)
+      );
+
+      if (!found) {
+        return { success: false, message: '未找到该缘籍账户，请先注册' };
+      }
+
+      if (found.passwordHash && password) {
+        if (btoa(password) !== found.passwordHash) {
+          return { success: false, message: '密码校验未通过，请核对' };
+        }
+      }
+
+      found.lastLoginAt = new Date().toISOString();
+      localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts));
+      localStorage.setItem(CURRENT_USER_ID_KEY, found.id);
+
+      // Load or Create user profile for this user ID
+      const userKey = `${USER_STORAGE_KEY}_${found.id}`;
+      let userProfile = this.getUser();
+      const savedUserStr = localStorage.getItem(userKey);
+      if (savedUserStr) {
+        userProfile = JSON.parse(savedUserStr);
+      } else {
+        userProfile = {
+          ...userProfile,
+          id: found.id,
+          name: found.username,
+          account: found,
+        };
+      }
+      this.saveUser(userProfile);
+
+      return { success: true, message: `欢迎归来，${userProfile.name}`, user: userProfile };
+    } catch (e) {
+      console.error(e);
+      return { success: false, message: '登录失败，请重试' };
+    }
+  },
+
+  logoutAccount(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.removeItem(CURRENT_USER_ID_KEY);
+      const guestUser: UserProfile = {
+        ...DEFAULT_USER,
+        name: '随喜访客',
+        account: undefined,
+      };
+      this.saveUser(guestUser);
+    } catch (e) {
+      console.error('Logout error', e);
+    }
+  },
+
+  isLoggedIn(): boolean {
+    const user = this.getUser();
+    return !!(user.account && user.account.isRegistered);
+  },
+
+  // 12. Data Reset
   resetAllData(): void {
     if (typeof window === 'undefined') return;
     try {
@@ -355,6 +507,7 @@ export const Storage = {
       localStorage.removeItem(ENTITLEMENT_STORAGE_KEY);
       localStorage.removeItem(PRIVACY_STORAGE_KEY);
       localStorage.removeItem(ONBOARDING_COMPLETED_KEY);
+      localStorage.removeItem(CURRENT_USER_ID_KEY);
       localStorage.removeItem('tianji_daily_card');
       localStorage.removeItem('tianji_user_profile');
       localStorage.removeItem('tianji_reading_history');

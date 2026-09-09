@@ -4,7 +4,7 @@ export type Element = 'wood' | 'fire' | 'earth' | 'metal' | 'water';
 export type YinYang = 'yin' | 'yang';
 export type ArchetypeType = 'deity' | 'buddha' | 'bodhisattva' | 'immortal' | 'beast' | 'artifact' | 'symbol';
 
-export type SpreadType = 'three' | 'six' | 'nine';
+export type SpreadType = 'one' | 'three' | 'six' | 'nine';
 export type QuestionCategory = 'love' | 'wealth' | 'career' | 'relationship' | 'general' | 'custom';
 export type QuestionDomain = 'love' | 'career' | 'wealth' | 'relationship' | 'life' | 'decision';
 export type QuestionIntent = 'future' | 'decision' | 'outcome' | 'obstacle' | 'opportunity' | 'timing' | 'person' | 'advice';
@@ -145,6 +145,7 @@ export interface SpreadConfig {
   description: string;
   tokenCost: number;
   isPremium?: boolean;
+  isComingSoon?: boolean;
   positions: SpreadPosition[];
 }
 
@@ -200,7 +201,19 @@ export interface ReadingAnalysis {
   cardManifestations?: CardManifestationResult[];
 }
 
+export interface UserAccount {
+  id: string;
+  email?: string;
+  phone?: string;
+  username: string;
+  passwordHash?: string;
+  isRegistered: boolean;
+  registeredAt?: string;
+  lastLoginAt?: string;
+}
+
 export interface UserProfile {
+  id?: string;
   name: string;
   avatar: string;
   tokens: number;
@@ -214,4 +227,6 @@ export interface UserProfile {
   zodiac?: string;
   mainElement?: Element;
   collectedCardIds: string[];
+  account?: UserAccount;
 }
+

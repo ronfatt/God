@@ -1059,13 +1059,27 @@ export const ORACLE_CARDS: OracleCardData[] = TIANJI_52_CARDS.map((card) => {
 
 export const SPREAD_CONFIGS: SpreadConfig[] = [
   {
+    type: 'one',
+    title: '一牌定音 · 基础神谕',
+    nameEn: 'Single Card Oracle',
+    cardCount: 1,
+    description: '直指本心，一牌显圣。针对今日气机或当下单一疑问，快速洞悉天地核心指引。',
+    tokenCost: 0,
+    isPremium: false,
+    isComingSoon: false,
+    positions: [
+      { id: 'single', title: '神谕核心 · 本象', subtitle: 'Core Oracle', description: '当下天地核心定数与显化神谕' },
+    ],
+  },
+  {
     type: 'three',
-    title: '三才神谕',
+    title: '三才神谕 · 乾坤推演',
     nameEn: 'Three Realms Spread',
     cardCount: 3,
     description: '天、地、人三维交织，快速剖析事件过去根源、当下症结与未来走向。',
     tokenCost: 0,
     isPremium: false,
+    isComingSoon: false,
     positions: [
       { id: 'sky', title: '天 · 过去根源', subtitle: 'Past / Origin', description: '事件的初始因缘与潜藏因果' },
       { id: 'man', title: '人 · 当下状态', subtitle: 'Present / Core', description: '当前核心矛盾与身心处境' },
@@ -1080,6 +1094,7 @@ export const SPREAD_CONFIGS: SpreadConfig[] = [
     description: '全方位洞悉人生六大核心支柱，深度剖析本命与未来90天综合运势。',
     tokenCost: 20,
     isPremium: false,
+    isComingSoon: true,
     positions: [
       { id: 'self', title: '本命 · 核心格局', subtitle: 'Core Essence', description: '内在根基与当前心性状态' },
       { id: 'wealth', title: '财富 · 财库机运', subtitle: 'Wealth & Assets', description: '财源流通、投资与进账机遇' },
@@ -1097,6 +1112,7 @@ export const SPREAD_CONFIGS: SpreadConfig[] = [
     description: '3×3 奇门阵法，涵盖本命、财富、事业、阻碍、转机等九重命门。',
     tokenCost: 50,
     isPremium: true,
+    isComingSoon: true,
     positions: [
       { id: 'pos-1', title: '财富宫', subtitle: 'Wealth Realm', description: '财帛丰盈与现金流转' },
       { id: 'pos-2', title: '天命宫', subtitle: 'Destiny Realm', description: '宏观天时与高维指引' },

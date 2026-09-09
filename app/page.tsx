@@ -137,7 +137,7 @@ export default function HomePage() {
         >
           <div className="absolute inset-0 w-1/2 h-full bg-white/30 transform -skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000 pointer-events-none" />
           <Sparkles className="w-5 h-5 fill-stone-950 animate-spin-slow" />
-          <span className="tracking-[0.2em]">开启三才 · 六合 · 九宫起卦</span>
+          <span className="tracking-[0.2em]">一牌定音 · 三才神谕起卦</span>
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform stroke-[2.5]" />
         </Link>
       </section>

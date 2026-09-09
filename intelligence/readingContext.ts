@@ -40,8 +40,17 @@ export function buildReadingContext(
     let relevanceScore = 10;
     let isSynergistic = false;
 
+    // 0. 一牌定音位置分析
+    if (spread === 'one') {
+      positionId = 'single';
+      positionTitle = '神谕核心 · 本象';
+      contextMeaning = `当下核心天机与因缘总纲：【${card.cardName} · ${card.archetype}】正在主导当前命局，${card.upright}`;
+      relevanceScore = 15;
+      isSynergistic = true;
+    }
+
     // 1. 三才神谕位置分析
-    if (spread === 'three') {
+    else if (spread === 'three') {
       if (idx === 0) {
         positionId = 'sky';
         positionTitle = '天 · 过去前因';

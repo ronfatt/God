@@ -8,6 +8,7 @@ import { Storage, DEFAULT_USER } from '@/lib/storage';
 import { sound } from '@/lib/sound';
 import { generateHistoryInsights, HistoryInsightsResult } from '@/intelligence';
 import { PaywallModal } from '@/components/Premium/PaywallModal';
+import { AuthModal } from '@/components/Auth/AuthModal';
 import {
   Coins,
   Flame,
@@ -23,6 +24,10 @@ import {
   Crown,
   ArrowRight,
   Trash2,
+  UserCheck,
+  LogIn,
+  LogOut,
+  UserPlus,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -32,6 +37,8 @@ export default function ProfilePage() {
   const [insights, setInsights] = useState<HistoryInsightsResult | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('register');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -92,9 +99,89 @@ export default function ProfilePage() {
     window.location.reload();
   };
 
+  const handleLogout = () => {
+    sound.playBassHit();
+    Storage.logoutAccount();
+    setUser(Storage.getUser());
+  };
+
+  const isRegistered = !!(user.account && user.account.isRegistered);
+
   return (
     <div className="flex-1 flex flex-col px-4 pt-1 pb-8 space-y-4 select-none">
       <TopHeader title="命主档案" />
+
+      {/* Member Registration & Login Banner */}
+      <div className={`w-full p-4 rounded-3xl border transition-all ${
+        isRegistered
+          ? 'bg-gradient-to-r from-emerald-50/80 via-white to-amber-50/50 border-emerald-300 shadow-xs'
+          : 'bg-gradient-to-r from-amber-100/90 via-amber-50 to-amber-100/70 border-amber-400 shadow-sm'
+      }`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-sm ${
+              isRegistered
+                ? 'bg-emerald-100 border border-emerald-300 text-emerald-900'
+                : 'bg-amber-500 text-stone-950 font-bold shadow-xs'
+            }`}>
+              {isRegistered ? <UserCheck className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-xs font-serif font-black text-stone-900">
+                  {isRegistered ? '已开辟天机缘籍会员' : '尚未开辟天机专属缘籍'}
+                </h3>
+                <span className={`px-2 py-0.2 rounded-full text-[9.5px] font-serif font-bold ${
+                  isRegistered
+                    ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                    : 'bg-amber-200 text-amber-950 border border-amber-400'
+                }`}>
+                  {isRegistered ? '正式会员' : '访客体验'}
+                </span>
+              </div>
+              <p className="text-[10.5px] text-stone-600 font-serif mt-0.5">
+                {isRegistered
+                  ? `账号：${user.account?.username} · 数据已永久云端同步`
+                  : '免费注册道号，立领 150 灵石并永久保存全盘占验记录'}
+              </p>
+            </div>
+          </div>
+
+          <div>
+            {isRegistered ? (
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-stone-600 text-xs font-serif font-bold hover:bg-stone-50 flex items-center gap-1 transition-colors shadow-2xs"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>退出</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => {
+                    setAuthMode('login');
+                    setIsAuthModalOpen(true);
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl bg-white border border-amber-300 text-amber-900 text-xs font-serif font-bold hover:bg-amber-50 shadow-2xs"
+                >
+                  登录
+                </button>
+                <button
+                  onClick={() => {
+                    setAuthMode('register');
+                    setIsAuthModalOpen(true);
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-amber-500 text-stone-950 text-xs font-serif font-black hover:bg-amber-400 shadow-xs active:scale-95 transition-all flex items-center gap-1"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>注册</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* User Hero Card */}
       <div className="w-full glass-panel rounded-3xl p-5 border border-amber-300 shadow-sm relative overflow-hidden">
@@ -412,6 +499,17 @@ export default function ProfilePage() {
       <PaywallModal
         isOpen={isPaywallOpen}
         onClose={() => setIsPaywallOpen(false)}
+      />
+
+      {/* Auth Modal (Login / Register) */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        initialMode={authMode}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={(newUser) => {
+          setUser(newUser);
+          setNameInput(newUser.name);
+        }}
       />
 
       {/* Reset Confirmation Modal */}

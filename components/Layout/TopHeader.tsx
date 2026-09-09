@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Volume2, VolumeX, Flame, Coins, ChevronLeft, Sparkles } from 'lucide-react';
+import { Volume2, VolumeX, Flame, Coins, ChevronLeft, Sparkles, User, UserCheck } from 'lucide-react';
 import { sound } from '@/lib/sound';
 import { Storage } from '@/lib/storage';
 import { UserProfile } from '@/types/oracle';
+import { AuthModal } from '@/components/Auth/AuthModal';
 
 interface TopHeaderProps {
   title?: string;
@@ -32,6 +33,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ title, showBack, onBack })
     const nextMute = sound.toggleMute();
     setIsMuted(nextMute);
   };
+
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 w-full px-4 py-3 bg-[#FAF8F5]/90 backdrop-blur-2xl border-b border-amber-400/25 flex items-center justify-between shadow-[0_2px_15px_rgba(180,140,50,0.06)]">
@@ -62,16 +65,39 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ title, showBack, onBack })
       </div>
 
       <div className="flex items-center gap-1.5">
+        {/* User Account / Login Quick Button */}
+        <button
+          onClick={() => {
+            sound.playCardSelect();
+            if (user?.account?.isRegistered) {
+              window.location.href = '/profile';
+            } else {
+              setIsAuthOpen(true);
+            }
+          }}
+          className={`flex items-center gap-1 px-2 py-1 rounded-full border text-xs font-serif transition-all shadow-xs active:scale-95 ${
+            user?.account?.isRegistered
+              ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-bold'
+              : 'bg-amber-100/90 border-amber-400 text-amber-950 font-black'
+          }`}
+        >
+          {user?.account?.isRegistered ? (
+            <>
+              <UserCheck className="w-3.5 h-3.5 text-emerald-700" />
+              <span className="max-w-[60px] truncate">{user.name}</span>
+            </>
+          ) : (
+            <>
+              <User className="w-3.5 h-3.5 text-amber-700" />
+              <span>注册/登录</span>
+            </>
+          )}
+        </button>
+
         {/* Token Balance */}
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-50 to-white border border-amber-300 text-amber-900 text-xs shadow-xs">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-50 to-white border border-amber-300 text-amber-900 text-xs shadow-xs">
           <Coins className="w-3.5 h-3.5 text-amber-600" />
           <span className="font-mono font-black">{user?.tokens ?? 120}</span>
-        </div>
-
-        {/* Streak */}
-        <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-rose-50 to-white border border-rose-300 text-rose-800 text-xs shadow-xs">
-          <Flame className="w-3.5 h-3.5 text-rose-600 fill-rose-500/20" />
-          <span className="font-mono font-black">{user?.streak ?? 7}</span>
         </div>
 
         {/* Sound Toggle */}
@@ -83,6 +109,14 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ title, showBack, onBack })
           {isMuted ? <VolumeX className="w-4 h-4 text-stone-400" /> : <Volume2 className="w-4 h-4 text-amber-600 animate-pulse" />}
         </button>
       </div>
+
+      {/* Auth Modal Triggered from Header */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        initialMode="register"
+        onClose={() => setIsAuthOpen(false)}
+        onSuccess={(newUser) => setUser(newUser)}
+      />
     </header>
   );
 };
