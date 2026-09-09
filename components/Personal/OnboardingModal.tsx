@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Calendar, Clock, MapPin, User, Check, Shield } from 'lucide-react';
 import { BirthProfile } from '@/personal/birthProfile';
@@ -14,11 +15,18 @@ interface OnboardingModalProps {
 }
 
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onComplete }) => {
+  const [mounted, setMounted] = useState(false);
   const [nickname, setNickname] = useState('天机居士');
   const [birthDate, setBirthDate] = useState('1996-08-18');
   const [birthTime, setBirthTime] = useState('10:30');
   const [birthPlace, setBirthPlace] = useState('吉隆坡 (Kuala Lumpur)');
   const [gender, setGender] = useState<'乾造 (男)' | '坤造 (女)' | '未透露'>('坤造 (女)');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const handleSave = () => {
     sound.playCardSelect();
@@ -40,17 +48,15 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onComp
     onComplete();
   };
 
-  if (!isOpen) return null;
-
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-stone-950/60 backdrop-blur-xs"
+          className="fixed inset-0 bg-stone-950/65 backdrop-blur-xs"
         />
 
         {/* Modal Window with Max Height & Scroll for Mobile screens */}
@@ -169,7 +175,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onComp
           <div className="space-y-1.5 pt-0.5">
             <button
               onClick={handleSave}
-              className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-stone-950 font-serif font-black text-xs shadow-[0_4px_20px_rgba(212,175,55,0.4)] active:scale-95 transition-all flex items-center justify-center gap-1.5"
+              className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-stone-950 font-serif font-black text-xs shadow-[0_4px_20px_rgba(212,175,55,0.4)] active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Check className="w-4 h-4" />
               <span>保存并开启天机档案</span>
@@ -177,13 +183,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onComp
 
             <button
               onClick={handleSkip}
-              className="w-full py-1.5 text-[11px] text-stone-400 hover:text-stone-700 font-serif transition-colors text-center"
+              className="w-full py-1.5 text-[11px] text-stone-400 hover:text-stone-700 font-serif transition-colors text-center cursor-pointer"
             >
               稍后填写，先体验抽牌 ➔
             </button>
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };

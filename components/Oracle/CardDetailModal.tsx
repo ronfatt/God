@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { OracleCardData } from '@/types/oracle';
 import { OracleCard } from '@/components/Cards/OracleCard';
@@ -23,22 +24,28 @@ const TYPE_NAME_MAP: Record<string, string> = {
 };
 
 export const CardDetailModal: React.FC<CardDetailModalProps> = ({ card, onClose }) => {
-  if (!card) return null;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!card || !mounted) return null;
 
   const suitInfo = formatSuitInfo(card.suit);
   const elementStyle = formatElementColor(card.element);
   const manif = card.manifestationResult;
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end justify-center pointer-events-auto">
+      <div className="fixed inset-0 z-[9999] flex items-end justify-center pointer-events-auto">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-stone-950/60 backdrop-blur-sm"
+          className="absolute inset-0 bg-stone-950/65 backdrop-blur-sm"
         />
 
         {/* Bottom Sheet Modal */}
@@ -217,6 +224,7 @@ export const CardDetailModal: React.FC<CardDetailModalProps> = ({ card, onClose 
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
