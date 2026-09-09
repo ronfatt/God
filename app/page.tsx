@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { UserProfile } from '@/types/oracle';
 import { TopHeader } from '@/components/Layout/TopHeader';
 import { DailyOneCard } from '@/components/Oracle/DailyOneCard';
 import { OnboardingModal } from '@/components/Personal/OnboardingModal';
