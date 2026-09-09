@@ -103,8 +103,8 @@ export const SupabaseService = {
         birthTime: '10:30',
         gender: newProfile.gender,
         birthPlace: newProfile.birthPlace,
-        zodiac: '丙子鼠',
-        mainElement: 'water',
+        zodiac,
+        mainElement,
         collectedCardIds: ['H-A', 'D-A', 'C-A', 'S-A'],
         account: {
           id: authData.user.id,
@@ -116,7 +116,7 @@ export const SupabaseService = {
         },
       };
 
-      return { success: true, message: '恭喜！天机缘籍已成功开辟', user: fullUser };
+      return { success: true, message: '恭喜！天机缘籍已成功开辟，获赠 150 灵石', user: fullUser };
     } catch (e: any) {
       return { success: false, message: e.message || '注册网络异常' };
     }
@@ -159,6 +159,9 @@ export const SupabaseService = {
         console.warn('Could not fetch cloud profile:', err);
       }
 
+      const birthDateStr = cloudProfile?.birth_date || '1996-08-18';
+      const { zodiac, mainElement } = calculateZodiacFromBirthDate(birthDateStr);
+
       const fullUser: UserProfile = {
         id: authData.user.id,
         name: cloudProfile?.nickname || cloudProfile?.username || authData.user.user_metadata?.nickname || cleanId,
@@ -166,12 +169,12 @@ export const SupabaseService = {
         tokens: cloudProfile?.tokens ?? 150,
         streak: cloudProfile?.streak ?? 1,
         totalDraws: cloudProfile?.total_draws ?? 0,
-        birthDate: cloudProfile?.birth_date || '1996-08-18',
+        birthDate: birthDateStr,
         birthTime: cloudProfile?.birth_time || '10:30',
         gender: cloudProfile?.gender || '坤造 (女)',
-        birthPlace: cloudProfile?.birth_place || '浙江 · 杭州',
-        zodiac: cloudProfile?.zodiac || '丙子鼠',
-        mainElement: cloudProfile?.main_element || 'water',
+        birthPlace: cloudProfile?.birth_place || '吉隆坡 (Kuala Lumpur)',
+        zodiac: cloudProfile?.zodiac || zodiac,
+        mainElement: cloudProfile?.main_element || mainElement,
         collectedCardIds: cloudProfile?.collected_card_ids || ['H-A', 'D-A', 'C-A', 'S-A'],
         account: {
           id: authData.user.id,

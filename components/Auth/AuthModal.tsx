@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Storage } from '@/lib/storage';
+import { createInitialWallet } from '@/premium/tokenWallet';
 import { sound } from '@/lib/sound';
 import { SupabaseService } from '@/lib/supabaseService';
 import { UserProfile } from '@/types/oracle';
@@ -59,6 +60,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         });
 
         if (cloudRes.success && cloudRes.user) {
+          Storage.saveWallet(createInitialWallet(cloudRes.user.tokens ?? 150));
           Storage.saveUser(cloudRes.user);
           sound.playZenChime(528, 1.5);
           setSuccessMsg(cloudRes.message);
@@ -89,6 +91,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       } else {
         const cloudRes = await SupabaseService.login(username, password || undefined);
         if (cloudRes.success && cloudRes.user) {
+          Storage.saveWallet(createInitialWallet(cloudRes.user.tokens ?? 150));
           Storage.saveUser(cloudRes.user);
           sound.playZenChime(440, 1.2);
           setSuccessMsg(cloudRes.message);
