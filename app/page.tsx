@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { TopHeader } from '@/components/Layout/TopHeader';
 import { DailyOneCard } from '@/components/Oracle/DailyOneCard';
 import { OnboardingModal } from '@/components/Personal/OnboardingModal';
+import { AuthModal } from '@/components/Auth/AuthModal';
 import { generateDailyOracle, DailyOracleResult } from '@/ritual/dailyOracle';
 import { Storage } from '@/lib/storage';
 import { sound } from '@/lib/sound';
@@ -19,23 +20,71 @@ import {
   ShieldCheck,
   TrendingUp,
   Flame,
+  UserPlus,
+  FileEdit,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function HomePage() {
   const router = useRouter();
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [dailyData, setDailyData] = useState<DailyOracleResult | null>(null);
   const [user, setUser] = useState(Storage.getUser());
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isOnboardingDone, setIsOnboardingDone] = useState(true);
 
   useEffect(() => {
-    if (!Storage.isOnboardingCompleted()) {
-      setShowOnboarding(true);
+    const loggedIn = Storage.isLoggedIn();
+    const currentUser = Storage.getUser();
+    const onboardingDone = Storage.isOnboardingCompleted();
+
+    setIsLoggedIn(loggedIn);
+    setUser(currentUser);
+    setIsOnboardingDone(onboardingDone);
+
+    // Entrance Flow Logic:
+    if (!loggedIn) {
+      // 1. Not logged in: auto pop up Auth modal (if not dismissed in current session)
+      const dismissed = typeof window !== 'undefined' ? sessionStorage.getItem('tianji_guest_auth_dismissed') : null;
+      if (!dismissed) {
+        setShowAuthModal(true);
+      }
+    } else {
+      // 2. Logged in but profile incomplete: prompt Onboarding modal
+      if (!onboardingDone) {
+        setShowOnboarding(true);
+      }
     }
-    const oracle = generateDailyOracle(user.name);
+
+    const oracle = generateDailyOracle(currentUser.name);
     setDailyData(oracle);
-    setUser(Storage.getUser());
+
+    const handleStorageChange = () => {
+      setUser(Storage.getUser());
+      setIsLoggedIn(Storage.isLoggedIn());
+      setIsOnboardingDone(Storage.isOnboardingCompleted());
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
+
+  const handleAuthClose = () => {
+    setShowAuthModal(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('tianji_guest_auth_dismissed', 'true');
+    }
+  };
+
+  const handleAuthSuccess = (newUser: UserProfile) => {
+    setUser(newUser);
+    setIsLoggedIn(true);
+    setShowAuthModal(false);
+    // After registration/login, prompt for profile completion if not done
+    if (!Storage.isOnboardingCompleted()) {
+      setTimeout(() => setShowOnboarding(true), 450);
+    }
+  };
 
   const handleStartOracle = () => {
     sound.playCardSelect();
@@ -45,6 +94,59 @@ export default function HomePage() {
     <div className="flex-1 flex flex-col px-4 pt-2 pb-8 space-y-4 select-none animate-fade-in">
       {/* Top Navigation & Status */}
       <TopHeader />
+
+      {/* 00. Dynamic User Status Banners */}
+      {/* Case A: Logged in but Profile Incomplete */}
+      {isLoggedIn && !isOnboardingDone && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full p-3.5 rounded-3xl bg-gradient-to-r from-amber-100 via-amber-50 to-amber-100 border-2 border-amber-400/80 text-amber-950 flex items-center justify-between shadow-sm font-serif"
+        >
+          <div className="flex items-center gap-2.5 min-w-0 pr-2">
+            <div className="w-8 h-8 rounded-2xl bg-amber-200 border border-amber-400 flex items-center justify-center text-amber-900 shrink-0 shadow-2xs">
+              <FileEdit className="w-4 h-4" />
+            </div>
+            <div className="truncate">
+              <div className="text-xs font-black text-amber-900 flex items-center gap-1">
+                <span>天机档案待完善</span>
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+              </div>
+              <p className="text-[11px] text-stone-600 truncate">
+                道友【{user.name}】：填写出生时辰解锁本命五行加持
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowOnboarding(true)}
+            className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-serif font-black text-xs shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
+          >
+            去完善 ➔
+          </button>
+        </motion.div>
+      )}
+
+      {/* Case B: Guest Visitor Mode */}
+      {!isLoggedIn && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-400/15 to-amber-500/10 border border-amber-400/50 text-amber-950 flex items-center justify-between shadow-2xs font-serif"
+        >
+          <div className="flex items-center gap-2 min-w-0 pr-2">
+            <span className="w-2 h-2 rounded-full bg-amber-600 animate-pulse shrink-0" />
+            <span className="text-[11.5px] text-stone-700 truncate font-medium">
+              随喜访客模式 · 注册开辟缘籍即获赠 <b className="text-amber-900 font-mono font-black">150 灵石</b>
+            </span>
+          </div>
+          <button
+            onClick={() => setShowAuthModal(true)}
+            className="px-2.5 py-1 rounded-xl bg-amber-500 text-stone-950 font-serif font-black text-[11px] shadow-xs hover:bg-amber-400 active:scale-95 transition-all shrink-0 cursor-pointer"
+          >
+            开辟缘籍
+          </button>
+        </motion.div>
+      )}
 
       {/* Hero Brand & Slogan */}
       <section className="flex flex-col items-center text-center pt-2 pb-1 relative">
@@ -266,13 +368,22 @@ export default function HomePage() {
         </Link>
       </section>
 
-      {/* Onboarding Modal for New Initiates */}
+      {/* Onboarding Modal for New Initiates (天机档案) */}
       <OnboardingModal
         isOpen={showOnboarding}
         onComplete={() => {
           setShowOnboarding(false);
+          setIsOnboardingDone(true);
           setUser(Storage.getUser());
         }}
+      />
+
+      {/* Auth Modal (注册/登录 开辟缘籍) */}
+      <AuthModal
+        isOpen={showAuthModal}
+        initialMode="register"
+        onClose={handleAuthClose}
+        onSuccess={handleAuthSuccess}
       />
     </div>
   );

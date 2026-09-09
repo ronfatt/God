@@ -60,8 +60,17 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onComp
           exit={{ scale: 0.95, opacity: 0, y: 15 }}
           className="relative z-10 w-full max-w-[390px] max-h-[90vh] bg-[#FAF8F5] border-2 border-amber-400 rounded-3xl p-4 sm:p-5 shadow-2xl space-y-3.5 flex flex-col overflow-y-auto my-auto"
         >
+          {/* Close button */}
+          <button
+            type="button"
+            onClick={handleSkip}
+            className="absolute top-3.5 right-3.5 p-1 rounded-full text-stone-400 hover:text-stone-700 transition-colors z-20"
+          >
+            <span className="text-xl leading-none">✕</span>
+          </button>
+
           {/* Header */}
-          <div className="text-center space-y-1">
+          <div className="text-center space-y-1 pt-0.5">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 border border-amber-400 text-amber-950 text-lg font-bold mx-auto flex items-center justify-center shadow-xs">
               ☯
             </div>
