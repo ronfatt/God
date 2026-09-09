@@ -1,5 +1,5 @@
 -- =========================================================
--- TIANJI 52 (天机52) · Supabase Production Database Schema
+-- TIANJI 52 (天机52) · Supabase Production Database Schema (Idempotent)
 -- Run this in Supabase SQL Editor (https://supabase.com/dashboard/project/ycgpxtegqmfpdydipmzm/sql)
 -- =========================================================
 
@@ -61,7 +61,18 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.readings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.daily_oracles ENABLE ROW LEVEL SECURITY;
 
--- 5. Profiles Policies
+-- 5. Safe Drop Existing Policies to prevent duplicate error
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
+
+DROP POLICY IF EXISTS "Users can view their own readings" ON public.readings;
+DROP POLICY IF EXISTS "Users can insert their own readings" ON public.readings;
+
+DROP POLICY IF EXISTS "Users can view their own daily oracles" ON public.daily_oracles;
+DROP POLICY IF EXISTS "Users can insert their own daily oracles" ON public.daily_oracles;
+
+-- 6. Recreate Policies Cleanly
 CREATE POLICY "Public profiles are viewable by everyone" 
 ON public.profiles FOR SELECT USING (true);
 
@@ -71,21 +82,19 @@ ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update their own profile" 
 ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
--- 6. Readings Policies
 CREATE POLICY "Users can view their own readings" 
 ON public.readings FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can insert their own readings" 
 ON public.readings FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- 7. Daily Oracles Policies
 CREATE POLICY "Users can view their own daily oracles" 
 ON public.daily_oracles FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can insert their own daily oracles" 
 ON public.daily_oracles FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- Trigger for Automatic Profile Creation on Supabase Auth Sign Up
+-- 7. Trigger for Automatic Profile Creation on Supabase Auth Sign Up
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
