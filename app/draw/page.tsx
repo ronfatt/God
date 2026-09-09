@@ -19,6 +19,7 @@ import { CombinationResonanceBanner } from '@/components/Oracle/CombinationReson
 import { analyzeCards } from '@/lib/readingEngine';
 import { IntelligenceReadingResult } from '@/intelligence';
 import { Storage } from '@/lib/storage';
+import { SupabaseService } from '@/lib/supabaseService';
 import { sound } from '@/lib/sound';
 import { Sparkles, Eye, ArrowRight, RotateCcw } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -92,6 +93,12 @@ function DrawContent() {
       setReadingResult(analysis);
       Storage.saveReading(analysis);
 
+      // Asynchronously sync to Supabase Cloud
+      const currentUser = Storage.getUser();
+      if (currentUser?.id) {
+        SupabaseService.syncReading(analysis, currentUser.id);
+      }
+
       setTimeout(() => {
         try {
           confetti({
@@ -115,6 +122,12 @@ function DrawContent() {
     const analysis = analyzeCards(cardsOnly, question, category, spreadType, isClarifier, parentReadingId);
     setReadingResult(analysis);
     Storage.saveReading(analysis);
+
+    // Asynchronously sync to Supabase Cloud
+    const currentUser = Storage.getUser();
+    if (currentUser?.id) {
+      SupabaseService.syncReading(analysis, currentUser.id);
+    }
 
     try {
       confetti({

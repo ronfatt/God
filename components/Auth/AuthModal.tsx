@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Storage } from '@/lib/storage';
 import { sound } from '@/lib/sound';
+import { SupabaseService } from '@/lib/supabaseService';
 import { UserProfile } from '@/types/oracle';
 import { Sparkles, X, User, Lock, Mail, Phone, ShieldCheck, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 
@@ -28,9 +29,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  const [isLoading, setIsLoading] = useState(false);
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccessMsg(null);
@@ -40,36 +43,75 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
-    if (mode === 'register') {
-      const res = Storage.registerAccount({
-        username,
-        password: password || undefined,
-        email: email || undefined,
-        phone: phone || undefined,
-      });
+    setIsLoading(true);
 
-      if (!res.success) {
-        setError(res.message);
-      } else if (res.user) {
-        sound.playZenChime(528, 1.5);
-        setSuccessMsg(res.message);
-        setTimeout(() => {
-          onSuccess(res.user!);
-          onClose();
-        }, 800);
+    try {
+      if (mode === 'register') {
+        // Try Cloud Supabase registration first
+        const cloudRes = await SupabaseService.register({
+          username,
+          password: password || undefined,
+          email: email || undefined,
+        });
+
+        if (cloudRes.success && cloudRes.user) {
+          Storage.saveUser(cloudRes.user);
+          sound.playZenChime(528, 1.5);
+          setSuccessMsg(cloudRes.message);
+          setTimeout(() => {
+            onSuccess(cloudRes.user!);
+            onClose();
+          }, 800);
+          return;
+        }
+
+        // Fallback to local storage
+        const localRes = Storage.registerAccount({
+          username,
+          password: password || undefined,
+          email: email || undefined,
+          phone: phone || undefined,
+        });
+
+        if (!localRes.success) {
+          setError(cloudRes.message || localRes.message);
+        } else if (localRes.user) {
+          sound.playZenChime(528, 1.5);
+          setSuccessMsg(localRes.message);
+          setTimeout(() => {
+            onSuccess(localRes.user!);
+            onClose();
+          }, 800);
+        }
+      } else {
+        // Try Cloud Supabase login first
+        const cloudRes = await SupabaseService.login(username, password || undefined);
+        if (cloudRes.success && cloudRes.user) {
+          Storage.saveUser(cloudRes.user);
+          sound.playZenChime(440, 1.2);
+          setSuccessMsg(cloudRes.message);
+          setTimeout(() => {
+            onSuccess(cloudRes.user!);
+            onClose();
+          }, 800);
+          return;
+        }
+
+        // Fallback to local storage
+        const localRes = Storage.loginAccount(username, password || undefined);
+        if (!localRes.success) {
+          setError(cloudRes.message || localRes.message);
+        } else if (localRes.user) {
+          sound.playZenChime(440, 1.2);
+          setSuccessMsg(localRes.message);
+          setTimeout(() => {
+            onSuccess(localRes.user!);
+            onClose();
+          }, 800);
+        }
       }
-    } else {
-      const res = Storage.loginAccount(username, password || undefined);
-      if (!res.success) {
-        setError(res.message);
-      } else if (res.user) {
-        sound.playZenChime(440, 1.2);
-        setSuccessMsg(res.message);
-        setTimeout(() => {
-          onSuccess(res.user!);
-          onClose();
-        }, 800);
-      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
