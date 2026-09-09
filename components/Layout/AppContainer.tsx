@@ -61,6 +61,13 @@ export const AppContainer: React.FC<AppContainerProps> = ({ children }) => {
           {children}
         </div>
 
+        {/* Discreet Copyright Footer (元象能量馆) */}
+        <footer className="relative z-10 w-full text-center py-4 px-4 select-none">
+          <p className="text-[10px] text-stone-400 font-serif tracking-wider">
+            天机52属于元象能量馆旗下版权 · 翻版必究
+          </p>
+        </footer>
+
         {/* Global Bottom Navigation */}
         {!hideBottomNav && <BottomNavigation />}
       </main>

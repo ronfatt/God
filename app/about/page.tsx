@@ -162,8 +162,8 @@ export default function AboutLandingPage() {
         </div>
       </section>
 
-      {/* Cultural Disclaimer */}
-      <section className="p-4 rounded-3xl bg-amber-50/60 border border-amber-200 space-y-1.5 text-center shadow-xs">
+      {/* Cultural Disclaimer & Brand Copyright */}
+      <section className="p-4 rounded-3xl bg-amber-50/60 border border-amber-200 space-y-2 text-center shadow-xs">
         <div className="flex items-center justify-center gap-1 text-xs text-stone-600 font-serif font-bold">
           <Shield className="w-3.5 h-3.5 text-amber-700" />
           <span>东方文化体验声明</span>
@@ -171,6 +171,11 @@ export default function AboutLandingPage() {
         <p className="text-[11px] text-stone-500 font-serif leading-relaxed">
           天机52以东方哲学、象征体系与直觉体验为基础，所有内容旨在启发个人反思与文化探索，不构成医疗、法律、投资等专业结论。
         </p>
+        <div className="pt-1 border-t border-amber-200/60">
+          <p className="text-[10px] text-amber-950 font-serif font-semibold">
+            天机52属于元象能量馆旗下版权 · 翻版必究
+          </p>
+        </div>
       </section>
     </div>
   );
