@@ -6,6 +6,7 @@ import { TopHeader } from '@/components/Layout/TopHeader';
 import { UserProfile } from '@/types/oracle';
 import { Storage, DEFAULT_USER } from '@/lib/storage';
 import { sound } from '@/lib/sound';
+import { calculateZodiacFromBirthDate } from '@/personal/birthProfile';
 import { generateHistoryInsights, HistoryInsightsResult } from '@/intelligence';
 import { PaywallModal } from '@/components/Premium/PaywallModal';
 import { AuthModal } from '@/components/Auth/AuthModal';
@@ -50,10 +51,15 @@ export default function ProfilePage() {
   useEffect(() => {
     const data = Storage.getUser();
     const history = Storage.getHistory();
+    if (data.birthDate) {
+      const { zodiac, mainElement } = calculateZodiacFromBirthDate(data.birthDate);
+      data.zodiac = zodiac;
+      data.mainElement = mainElement;
+    }
     setUser(data);
     setNameInput(data.name);
     setBirthDate(data.birthDate || '1996-08-18');
-    setBirthPlace(data.birthPlace || '浙江 · 杭州');
+    setBirthPlace(data.birthPlace || '吉隆坡 (Kuala Lumpur)');
     setGender(data.gender || '坤造 (女)');
     setIsMuted(sound.getMuted());
 
@@ -63,12 +69,15 @@ export default function ProfilePage() {
 
   const handleSaveProfile = () => {
     sound.playCardSelect();
+    const { zodiac, mainElement } = calculateZodiacFromBirthDate(birthDate);
     const updated: UserProfile = {
       ...user,
       name: nameInput,
       birthDate,
       birthPlace,
       gender,
+      zodiac,
+      mainElement,
     };
     setUser(updated);
     Storage.saveUser(updated);
@@ -214,10 +223,10 @@ export default function ProfilePage() {
 
             <div className="flex items-center gap-2 mt-1 flex-wrap text-xs">
               <span className="px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-900 font-serif text-[11px] font-bold">
-                {user.zodiac || '丙子鼠'} · 坤造
+                {user.zodiac || '丙子鼠'} · {user.gender ? user.gender.split(' ')[0] : '坤造'}
               </span>
               <span className="text-stone-500 text-[11px]">
-                {user.birthPlace || '浙江 · 杭州'}
+                {user.birthPlace || '吉隆坡 (Kuala Lumpur)'}
               </span>
             </div>
           </div>

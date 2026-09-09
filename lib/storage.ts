@@ -1,5 +1,5 @@
 import { UserProfile, ReadingAnalysis, UserAccount } from '@/types/oracle';
-import { BirthProfile, calculateProfileCompleteness } from '@/personal/birthProfile';
+import { BirthProfile, calculateProfileCompleteness, calculateZodiacFromBirthDate } from '@/personal/birthProfile';
 import { UserEntitlement } from '@/premium/entitlement';
 import { TianjiWallet, createInitialWallet } from '@/premium/tokenWallet';
 import { StreakState, DEFAULT_STREAK_REWARDS } from '@/ritual/streakEngine';
@@ -110,6 +110,13 @@ export const Storage = {
         profileCompleteness: completeness,
         updatedAt: new Date().toISOString(),
       };
+
+      if (updated.birthDate) {
+        const { zodiac, zodiacAnimal, mainElement } = calculateZodiacFromBirthDate(updated.birthDate);
+        updated.zodiacAnimal = zodiacAnimal;
+        updated.zodiacElement = mainElement;
+      }
+
       localStorage.setItem(BIRTH_STORAGE_KEY, JSON.stringify(updated));
 
       // Also sync user profile
@@ -119,6 +126,11 @@ export const Storage = {
       user.birthTime = updated.birthTime || user.birthTime;
       user.birthPlace = updated.birthPlace || user.birthPlace;
       user.gender = updated.gender || user.gender;
+      if (updated.birthDate) {
+        const { zodiac, mainElement } = calculateZodiacFromBirthDate(updated.birthDate);
+        user.zodiac = zodiac;
+        user.mainElement = mainElement;
+      }
       this.saveUser(user);
     } catch (e) {
       console.error('Failed to save birth profile', e);

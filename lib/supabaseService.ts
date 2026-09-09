@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { UserProfile, ReadingAnalysis } from '@/types/oracle';
-import { BirthProfile } from '@/personal/birthProfile';
+import { BirthProfile, calculateZodiacFromBirthDate } from '@/personal/birthProfile';
 
 /**
  * Supabase Cloud Service for Tianji 52
@@ -59,6 +59,8 @@ export const SupabaseService = {
         return { success: false, message: '注册异常，未返回用户' };
       }
 
+      const { zodiac, mainElement } = calculateZodiacFromBirthDate(params.birthDate || '1996-08-18');
+
       // Upsert profile record
       const newProfile: Partial<UserProfile> = {
         id: authData.user.id,
@@ -70,8 +72,8 @@ export const SupabaseService = {
         birthTime: '10:30',
         gender: params.gender || '坤造 (女)',
         birthPlace: '吉隆坡 (Kuala Lumpur)',
-        zodiac: '丙子鼠',
-        mainElement: 'water',
+        zodiac,
+        mainElement,
         collectedCardIds: ['H-A', 'D-A', 'C-A', 'S-A'],
       };
 
