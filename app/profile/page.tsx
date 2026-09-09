@@ -9,6 +9,7 @@ import { sound } from '@/lib/sound';
 import { generateHistoryInsights, HistoryInsightsResult } from '@/intelligence';
 import { PaywallModal } from '@/components/Premium/PaywallModal';
 import { AuthModal } from '@/components/Auth/AuthModal';
+import { MALAYSIA_REGIONS } from '@/data/regions';
 import {
   Coins,
   Flame,
@@ -257,13 +258,18 @@ export default function ProfilePage() {
               </div>
             </div>
             <div>
-              <label className="text-[10px] text-stone-500 font-serif block mb-1 font-medium">出生地点</label>
-              <input
-                type="text"
+              <label className="text-[10px] text-stone-500 font-serif block mb-1 font-medium">出生地点 (马来西亚)</label>
+              <select
                 value={birthPlace}
                 onChange={(e) => setBirthPlace(e.target.value)}
                 className="w-full px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-xs text-stone-900 focus:outline-none focus:border-amber-500 font-serif"
-              />
+              >
+                {MALAYSIA_REGIONS.map((region) => (
+                  <option key={region} value={region}>
+                    {region}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <button

@@ -25,7 +25,7 @@ export const DEFAULT_USER: UserProfile = {
   birthDate: '1996-08-18',
   birthTime: '10:30',
   gender: '坤造 (女)',
-  birthPlace: '浙江 · 杭州',
+  birthPlace: '吉隆坡 (Kuala Lumpur)',
   zodiac: '丙子鼠',
   mainElement: 'water',
   collectedCardIds: [
@@ -41,7 +41,7 @@ export const DEFAULT_BIRTH_PROFILE: BirthProfile = {
   nickname: '天机居士',
   birthDate: '1996-08-18',
   birthTime: '10:30',
-  birthPlace: '浙江 · 杭州',
+  birthPlace: '吉隆坡 (Kuala Lumpur)',
   gender: '坤造 (女)',
   zodiacAnimal: '鼠',
   zodiacElement: '水',
