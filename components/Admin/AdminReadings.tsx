@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { ReadingAnalysis } from '@/types/oracle';
+import { ReadingAnalysis, SpreadType } from '@/types/oracle';
+import { ORACLE_CARDS } from '@/data/cards';
 import { Search, Compass, Eye, Sparkles, RefreshCw, Layers } from 'lucide-react';
 
 interface AdminReadingsProps {
@@ -13,16 +14,33 @@ interface AdminReadingsProps {
 export const AdminReadings: React.FC<AdminReadingsProps> = ({ readings, onRefresh }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedReading, setSelectedReading] = useState<ReadingAnalysis | null>(null);
-  const [spreadFilter, setSpreadFilter] = useState<'all' | 'single' | 'three_card'>('all');
+  const [spreadFilter, setSpreadFilter] = useState<string>('all');
+
+  const getCardInfo = (cardId: string) => {
+    return ORACLE_CARDS.find((c) => c.id === cardId) || {
+      id: cardId,
+      cardName: cardId,
+      suit: 'spade',
+      rank: 'A',
+    };
+  };
 
   const filtered = readings.filter((r) => {
-    const matchSpread = spreadFilter === 'all' || r.spreadType === spreadFilter;
+    const sType = String(r.spreadType);
+    const matchSpread =
+      spreadFilter === 'all' ||
+      (spreadFilter === 'three' && (sType === 'three' || sType === 'three_card')) ||
+      (spreadFilter === 'one' && (sType === 'one' || sType === 'single'));
+
     const matchSearch =
-      r.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.oracleQuote.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.category.toLowerCase().includes(searchTerm.toLowerCase());
+      (r.question && r.question.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (r.oracleQuote && r.oracleQuote.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (r.category && String(r.category).toLowerCase().includes(searchTerm.toLowerCase()));
+
     return matchSpread && matchSearch;
   });
+
+  const isThreeSpread = (sType: any) => String(sType) === 'three' || String(sType) === 'three_card';
 
   return (
     <div className="space-y-4 select-none">
@@ -53,9 +71,9 @@ export const AdminReadings: React.FC<AdminReadingsProps> = ({ readings, onRefres
               全部
             </button>
             <button
-              onClick={() => setSpreadFilter('three_card')}
+              onClick={() => setSpreadFilter('three')}
               className={`px-2.5 py-1 rounded-lg transition-all ${
-                spreadFilter === 'three_card'
+                spreadFilter === 'three'
                   ? 'bg-amber-500 text-stone-950 font-bold'
                   : 'text-stone-400 hover:text-stone-200'
               }`}
@@ -63,9 +81,9 @@ export const AdminReadings: React.FC<AdminReadingsProps> = ({ readings, onRefres
               三才阵
             </button>
             <button
-              onClick={() => setSpreadFilter('single')}
+              onClick={() => setSpreadFilter('one')}
               className={`px-2.5 py-1 rounded-lg transition-all ${
-                spreadFilter === 'single'
+                spreadFilter === 'one'
                   ? 'bg-amber-500 text-stone-950 font-bold'
                   : 'text-stone-400 hover:text-stone-200'
               }`}
@@ -101,12 +119,12 @@ export const AdminReadings: React.FC<AdminReadingsProps> = ({ readings, onRefres
               <div className="flex items-center gap-2">
                 <span
                   className={`text-[10px] px-2 py-0.5 rounded font-serif font-bold ${
-                    r.spreadType === 'three_card'
+                    isThreeSpread(r.spreadType)
                       ? 'bg-amber-950/80 text-amber-300 border border-amber-500/40'
                       : 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/40'
                   }`}
                 >
-                  {r.spreadType === 'three_card' ? '三才天地人' : '一牌定音'}
+                  {isThreeSpread(r.spreadType) ? '三才天地人' : '一牌定音'}
                 </span>
                 <span className="text-[11px] text-stone-400 font-mono">
                   {r.date}
@@ -123,25 +141,28 @@ export const AdminReadings: React.FC<AdminReadingsProps> = ({ readings, onRefres
 
             {/* Cards Drawn in reading */}
             <div className="flex items-center gap-2 pt-1 overflow-x-auto">
-              {r.cards.map((c, i) => (
-                <div
-                  key={c.id + i}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-stone-950 border border-stone-800 flex-shrink-0"
-                >
-                  <div className="relative w-5 h-7 rounded overflow-hidden flex-shrink-0 bg-stone-900">
-                    <Image
-                      src={`/cards/${c.id}.jpg`}
-                      alt={c.cardName}
-                      fill
-                      sizes="20px"
-                      className="object-cover"
-                    />
+              {r.cards && r.cards.map((c, i) => {
+                const card = getCardInfo(c.cardId || (c as any).id);
+                return (
+                  <div
+                    key={(c.cardId || (c as any).id || '') + i}
+                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-stone-950 border border-stone-800 flex-shrink-0"
+                  >
+                    <div className="relative w-5 h-7 rounded overflow-hidden flex-shrink-0 bg-stone-900">
+                      <Image
+                        src={`/cards/${card.id}.jpg`}
+                        alt={card.cardName}
+                        fill
+                        sizes="20px"
+                        className="object-cover"
+                      />
+                    </div>
+                    <span className="text-[11px] font-serif text-stone-300 font-medium">
+                      {card.cardName}
+                    </span>
                   </div>
-                  <span className="text-[11px] font-serif text-stone-300 font-medium">
-                    {c.cardName}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="text-xs font-serif text-stone-400 line-clamp-2 bg-stone-950/50 p-2 rounded-xl border border-stone-800/80 italic">
@@ -182,26 +203,29 @@ export const AdminReadings: React.FC<AdminReadingsProps> = ({ readings, onRefres
               <div className="space-y-1.5">
                 <div className="text-stone-400 text-[11px]">圣相显像</div>
                 <div className="grid grid-cols-3 gap-2">
-                  {selectedReading.cards.map((c, i) => (
-                    <div
-                      key={c.id + i}
-                      className="p-2 rounded-xl bg-stone-950 border border-stone-800 text-center space-y-1.5"
-                    >
-                      <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden border border-amber-500/30">
-                        <Image
-                          src={`/cards/${c.id}.jpg`}
-                          alt={c.cardName}
-                          fill
-                          sizes="100px"
-                          className="object-cover"
-                        />
+                  {selectedReading.cards && selectedReading.cards.map((c, i) => {
+                    const card = getCardInfo(c.cardId || (c as any).id);
+                    return (
+                      <div
+                        key={(c.cardId || (c as any).id || '') + i}
+                        className="p-2 rounded-xl bg-stone-950 border border-stone-800 text-center space-y-1.5"
+                      >
+                        <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden border border-amber-500/30">
+                          <Image
+                            src={`/cards/${card.id}.jpg`}
+                            alt={card.cardName}
+                            fill
+                            sizes="100px"
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="font-bold text-stone-200 text-xs">{card.cardName}</div>
+                        <div className="text-[10px] text-amber-400 font-mono">
+                          {card.id}
+                        </div>
                       </div>
-                      <div className="font-bold text-stone-200 text-xs">{c.cardName}</div>
-                      <div className="text-[10px] text-amber-400 font-mono">
-                        {c.suit.toUpperCase()} · {c.value}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 

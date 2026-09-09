@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import { Storage } from './storage';
 import { ORACLE_CARDS } from '@/data/cards';
-import { UserProfile, ReadingAnalysis } from '@/types/oracle';
+import { UserProfile, ReadingAnalysis, SpreadType } from '@/types/oracle';
 
 export interface AdminSystemConfig {
   welcomeTokens: number;
@@ -148,7 +148,7 @@ export const AdminService = {
 
     if (localUser && localUser.account?.isRegistered) {
       list.push({
-        id: localUser.id,
+        id: localUser.id || 'u-local',
         username: localUser.account.username,
         nickname: localUser.name,
         tokens: localUser.tokens ?? 150,
@@ -240,14 +240,14 @@ export const AdminService = {
         // Update wallet
         const wallet = Storage.getWallet();
         wallet.balance = updatedTokens;
-        wallet.history.unshift({
+        if (!wallet.transactions) wallet.transactions = [];
+        wallet.transactions.unshift({
           id: `tx-admin-${Date.now()}`,
-          type: deltaTokens >= 0 ? 'EARN' : 'SPEND',
+          type: deltaTokens >= 0 ? 'earn' : 'spend',
           amount: Math.abs(deltaTokens),
-          balanceAfter: updatedTokens,
-          source: 'SYSTEM',
-          description: `【天机司总枢调配】${reason || (deltaTokens >= 0 ? '管理员增发' : '管理员核扣')}`,
+          reason: `【天机司总枢调配】${reason || (deltaTokens >= 0 ? '管理员增发' : '管理员核扣')}`,
           timestamp: Date.now(),
+          dateStr: new Date().toLocaleDateString('zh-CN'),
         });
         Storage.saveWallet(wallet);
       }
@@ -283,20 +283,31 @@ export const AdminService = {
             timestamp: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
             question: row.question || '所问何事',
             category: row.category || 'wealth',
-            spreadType: row.spread_type || 'three_card',
-            cards: row.cards || [],
+            spreadType: (row.spread_type as SpreadType) || 'three',
+            cards: Array.isArray(row.cards)
+              ? row.cards.map((c: any, i: number) => ({
+                  positionId: c.positionId || `pos-${i + 1}`,
+                  cardId: c.cardId || c.id || 'H-A',
+                }))
+              : [],
             overallScore: row.overall_score || 85,
             wealthScore: row.wealth_score || 80,
             careerScore: row.career_score || 80,
             loveScore: row.love_score || 80,
             noblemanScore: row.nobleman_score || 80,
             oracleQuote: row.oracle_quote || '天道酬勤，潜龙勿用。',
-            elementTrend: row.element_trend || '五行和顺',
+            elementTrend: typeof row.element_trend === 'object' && row.element_trend !== null ? row.element_trend : {
+              sequence: ['wood', 'fire'],
+              interaction: 'harmonious',
+              description: String(row.element_trend || '五行和顺'),
+            },
             dominantElement: row.dominant_element || 'fire',
-            actionAdvices: row.action_advices || ['静待时机', '积聚力量'],
+            actionAdvices: Array.isArray(row.action_advices)
+              ? (row.action_advices.slice(0, 3) as [string, string, string])
+              : ['静待时机', '积聚力量', '随遇而安'],
             timeline: { near: '', mid: '', far: '' },
             luckyElements: { color: '', direction: '', time: '', element: '', number: 8 },
-            overallManifestation: row.overall_manifestation || '大吉之兆',
+            overallManifestation: row.overall_manifestation,
           }));
         }
       } catch (err) {
@@ -305,7 +316,7 @@ export const AdminService = {
     }
 
     // Fallback: local readings
-    const local = Storage.getReadings();
+    const local = Storage.getHistory();
     if (local && local.length > 0) {
       return local;
     }
@@ -318,20 +329,27 @@ export const AdminService = {
         timestamp: Date.now() - 3600000 * 2,
         question: '今年下半年商业拓展与财运契机如何？',
         category: 'wealth',
-        spreadType: 'three_card',
-        cards: [ORACLE_CARDS[0], ORACLE_CARDS[13], ORACLE_CARDS[26]],
+        spreadType: 'three' as SpreadType,
+        cards: [
+          { positionId: 'pos-1', cardId: ORACLE_CARDS[0].id },
+          { positionId: 'pos-2', cardId: ORACLE_CARDS[13].id },
+          { positionId: 'pos-3', cardId: ORACLE_CARDS[26].id },
+        ],
         overallScore: 92,
         wealthScore: 95,
         careerScore: 88,
         loveScore: 78,
         noblemanScore: 90,
         oracleQuote: '天地交泰，商机蕴于东方木火之际。',
-        elementTrend: '木火相生 · 财运亨通',
+        elementTrend: {
+          sequence: ['wood', 'fire'],
+          interaction: 'generate',
+          description: '木火相生 · 财运亨通',
+        },
         dominantElement: 'fire',
-        actionAdvices: ['主动出击开辟新版图', '与南方或属火行业的贵人合谋'],
+        actionAdvices: ['主动出击开辟新版图', '与南方或属火行业的贵人合谋', '修持心念以定大局'],
         timeline: { near: '一月内有萌动', mid: '季内成型', far: '年终大成' },
         luckyElements: { color: '赤红/金黄', direction: '正南', time: '巳午时', element: '火', number: 9 },
-        overallManifestation: '财星高照，利见大人',
       },
     ];
   },
@@ -388,8 +406,8 @@ export const AdminService = {
       .filter((o) => o.status === 'paid')
       .reduce((acc, o) => acc + o.amount, 0);
 
-    const threeCardDraws = readings.filter((r) => r.spreadType === 'three_card').length;
-    const oneCardDraws = readings.filter((r) => r.spreadType === 'single').length;
+    const threeCardDraws = readings.filter((r) => r.spreadType === 'three' || (r.spreadType as any) === 'three_card').length;
+    const oneCardDraws = readings.filter((r) => r.spreadType === 'one' || (r.spreadType as any) === 'single').length;
 
     return {
       totalUsers,
